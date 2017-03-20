@@ -13,6 +13,7 @@
         android:theme="@style/AppTheme">
 
     <service android:name=".ConnectionService"></service>
+        <service android:name=".WakeUpService"></service>
 
     <activity android:name=".SplashActivity"
         android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
@@ -28,6 +29,11 @@
         <activity android:name=".QueryUser"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:screenOrientation="landscape"></activity>
+
+        <activity android:name=".IdleActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:screenOrientation="landscape"
+            ></activity>
 
     </application>
 

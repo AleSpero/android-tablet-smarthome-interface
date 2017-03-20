@@ -36,41 +36,8 @@ public class ConnectionService extends Service {
     public void onCreate(){
         super.onCreate();
 
-        //Effettuo connessione
-        client = new Client(ip,port);
-
-        //Setto callbacks
-        client.setConnectionListener(new ConnectionListener() {
-            @Override
-            public void onMessage(String message) {
-                Log.v("ConnectionService","Ricevuto: "+message);
-                data.add(message);
-            }
-
-            @Override
-            public void onConnect(Socket socket) {
-                Log.v("ConnectionService","Connected");
-                connected=true;
-            }
-
-            @Override
-            public void onDisconnect(Socket socket, String message) {
-                Log.v("ConnectionService","Disconnected");
-                connected=false;
-            }
-
-            @Override
-            public void onConnectError(Socket socket, String message) {
-                Log.e("ConnectionService","Connection Error: "+message);
-                connected=false;
-
-            }
-        });
-
-        //Connetto al Server
-        client.connect();
-
-        Log.v("Service, onCreate","Connessione TCP iniziata");
+       //Eseguo connessione
+        connect();
 
     }
 
@@ -79,8 +46,10 @@ public class ConnectionService extends Service {
         return binder;
     }
 
+
     //Definisco metodi custom che le activity chiameranno
 
+    //Forse questo non serve
     public boolean isConnected(){
         return connected;
     }
@@ -101,6 +70,61 @@ public class ConnectionService extends Service {
 
     public String sendData(){
         return "da fare";
+    }
+
+    public boolean connect(){
+
+        if(!connected) {
+
+            //Effettuo connessione
+            client = new Client(ip, port);
+
+            //Setto callbacks
+            client.setConnectionListener(new ConnectionListener() {
+                @Override
+                public void onMessage(String message) {
+                    Log.v("ConnectionService", "Ricevuto: " + message);
+                    data.add(message);
+                }
+
+                @Override
+                public void onConnect(Socket socket) {
+                    Log.v("ConnectionService", "Connected");
+                    connected = true;
+                }
+
+                @Override
+                public void onDisconnect(Socket socket, String message) {
+                    Log.v("ConnectionService", "Disconnected");
+                    connected = false;
+                }
+
+                @Override
+                public void onConnectError(Socket socket, String message) {
+                    Log.e("ConnectionService", "Connection Error: " + message);
+                    connected = false;
+
+                }
+            });
+
+            //Connetto al Server
+            client.connect();
+
+            Log.v("Service, onCreate", "Connessione TCP iniziata");
+        }
+
+        return connected;
+    }
+
+    public void disconnect(){
+        if(connected) {
+            client.disconnect();
+        }
+    }
+
+    @Override
+    public void onDestroy(){
+        Log.d("ConnectionService","Servizio Chiuso");
     }
 
 
