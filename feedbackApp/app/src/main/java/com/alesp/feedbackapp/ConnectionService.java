@@ -6,6 +6,10 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -31,6 +35,8 @@ public class ConnectionService extends Service {
 
     //Creo arraylist che conterrà i dati ricevuti dal raspberry
     ArrayList<String> data = new ArrayList<String>();
+    JSONArray jsonValues = new JSONArray();
+
 
     @Override
     public void onCreate(){
@@ -54,14 +60,14 @@ public class ConnectionService extends Service {
         return connected;
     }
 
-    public ArrayList<String> getData(){
+    public String getData(){
 
         //Questo metodo è da riguardare: per ora, dato un arraylist che funziona a mo
         //di buffer, restituisce il primo elemento all'activity, che verrà poi cancellato.
         //(è importante cancellarlo? vedi)
 
-        if(!data.isEmpty()){
-            return data;
+        if(jsonValues.length()!=0){
+            return jsonValues.toString();
         }
         else{
             return null;
@@ -84,7 +90,14 @@ public class ConnectionService extends Service {
                 @Override
                 public void onMessage(String message) {
                     Log.v("ConnectionService", "Ricevuto: " + message);
-                    data.add(message);
+
+                    try {
+                        jsonValues.put(new JSONObject(message));
+                    }
+                    catch(JSONException e){
+                        Log.e("onMessage",e.toString());
+                    }
+                   // data.add(message);
                 }
 
                 @Override

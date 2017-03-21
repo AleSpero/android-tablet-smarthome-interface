@@ -5,8 +5,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -40,26 +45,30 @@ public class QueryUser extends Activity {
     //guardando le attività 4-5-6 e quindi bisognerà riferirsi a quegli indici. altrimenti le attività interessate saranno la 1-2-3.
     boolean otherbuttonPressed = false;
 
+    //Questa variabile serve per ottenere i dati dal service
+    Bundle datafromService;
+
     //Definisco il mio service e il boolean boundtoactivity per indicare se il processo
     // è collegato all'activity
     ConnectionService connService;
     boolean boundToActivity = false;
 
-    private ServiceConnection servConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.v("onServiceConnected","Service connesso!");
+    @Override
+    protected void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.query_user);
 
-            //Setto il flag boundtoprocess = true
-            boundToActivity = true;
+        //faccio collegamenti vari
+        firstactivity = (Button) findViewById(R.id.first_activity);
+        secondactivity = (Button) findViewById(R.id.second_activity);
+        thirdactivity = (Button) findViewById(R.id.third_activity);
+        otheractivity = (Button) findViewById(R.id.other);
 
-            //Effettuo il collegamento (giusto?)
-            ConnectionService.ConnectionBinder binder = (ConnectionService.ConnectionBinder) service;
-            connService = binder.getService();
-
-            //Prendo i dati ricevuti da internet e li trasformo in oggetti JSON
+            //Prendo il dato ricevuto dal service e lo trasformo in un oggetto JSON
             try {
-                receivedData = new JSONObject(connService.getData().get(1));
+                datafromService = getIntent().getExtras();
+               // probActivities = new JSONArray(datafromService.getString("Data")).getJSONArray(1);
+                receivedData = new JSONObject(datafromService.getString("Data"));
                 probActivities = (JSONArray) receivedData.get("data");
                 maxObj = new JSONObject("{'activity':'lol','probability':0.0}");
 
@@ -113,10 +122,6 @@ public class QueryUser extends Activity {
                                         .duration(500)
                                         .playOn(findViewById(R.id.third_activity));
 
-                                YoYo.with(Techniques.FadeIn)
-                                        .duration(500)
-                                        .playOn(findViewById(R.id.other));
-
                                 //setto otherbuttonpressed
                                 otherbuttonPressed = false;
                             }
@@ -161,54 +166,36 @@ public class QueryUser extends Activity {
                 Log.e("onServiceConnected",e.toString());
             }
 
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Log.v("onServiceDisonnected","Service disconnesso!");
-            boundToActivity = false;
-        }
-    };
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState){
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.query_user);
-
-        //faccio collegamenti vari
-        firstactivity = (Button) findViewById(R.id.first_activity);
-        secondactivity = (Button) findViewById(R.id.second_activity);
-        thirdactivity = (Button) findViewById(R.id.third_activity);
-        otheractivity = (Button) findViewById(R.id.other);
-
     }
 
     @Override
     protected void onStart(){
         super.onStart();
-        //Collego l'activity al service
-        Intent intent = new Intent(this, ConnectionService.class);
-        bindService(intent,servConnection, Context.BIND_AUTO_CREATE);
-        boundToActivity = true;
+
+        //Inserisco nelle sharedpref che l'activity sta andando (mi serve nel wakeup service)
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor ed = sp.edit();
+        ed.putBoolean("active", true);
+        ed.commit();
+
+        //Faccio partire suono notifica
+        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+        r.play();
     }
 
     @Override
     protected void onPause(){
         super.onPause();
-        if(boundToActivity){
-            unbindService(servConnection);
-            boundToActivity=false;
-        }
     }
 
     @Override
     protected void onStop(){
         super.onStop();
-        //Scollego l'activity al service
-        if(boundToActivity){
-            unbindService(servConnection);
-            boundToActivity=false;
-        }
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor ed = sp.edit();
+        ed.putBoolean("active", false);
+        ed.commit();
     }
 }
