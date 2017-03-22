@@ -38,9 +38,8 @@ public class IdleActivity extends Activity {
 
     //Definisco il mio service e il boolean boundtoactivity per indicare se il processo
     // è collegato all'activity
-    private ConnectionService connService;
     private WakeUpService wakeService;
-    private boolean connBoundToActivity = false;
+
     private boolean wakeupBoundToActivity = false;
 
     //variabili per notifiche
@@ -48,70 +47,6 @@ public class IdleActivity extends Activity {
     Notification notifica;
     int NOTIFICATION_SERVICE_RUNNING_ID = 0;
 
-    private ServiceConnection servConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.v("onServiceConnected", "Service ConnectionService connesso!");
-
-            //Setto il flag boundtoprocess = true
-            connBoundToActivity = true;
-
-            //Effettuo il collegamento (giusto?)
-            ConnectionService.ConnectionBinder binder = (ConnectionService.ConnectionBinder) service;
-            connService = binder.getService();
-
-            //Controllo che il service sia connesso all'activity, e una volta fatto ciò connetto e ricevo i dati
-            if (connBoundToActivity) {
-
-                new Handler().postDelayed(new Runnable() {
-
-                    @Override
-                    public void run() {
-
-                if (connService.isConnected() && connService.getData() != null) {
-                    //Se le seguenti condizioni sono verificate, allora sono stati ricevuti correttamente i dati
-                    data = connService.getData();
-
-                    //Una volta ricevuti i dati, posso far partire WakeUpService, passandogli tramite intent i dati ottenuti
-                    //da connectionservice
-
-                    //Faccio partire Wake Up Service
-                    Intent wakeupIntent = new Intent(IdleActivity.this, WakeUpService.class);
-
-                    //Aggiungo dati da passare a WakeUpService
-                    wakeupIntent.putExtra("receivedData",data);
-
-                    bindService(wakeupIntent,wakeupConnection, Context.BIND_AUTO_CREATE);
-                    wakeupBoundToActivity = true;
-
-                } else {
-                    //connessione non riuscita: mando un errore e chiudo l'app
-                    new AlertDialog.Builder(IdleActivity.this)
-                            .setTitle("Connessione non riuscita")
-                            .setMessage("Impossibile connettersi al server.\n Riprova in un altro momento.")
-                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    //chiudo l'app
-                                    android.os.Process.killProcess(android.os.Process.myPid());
-                                    System.exit(1);
-                                }
-                            })
-                            .show();
-
-
-                }
-                    }
-                }, 500);
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Log.v("onServiceDisonnected","Service ConnectionService disconnesso!");
-            connBoundToActivity = false;
-        }
-    };
     private ServiceConnection wakeupConnection = new ServiceConnection() {
                 @Override
                 public void onServiceConnected(ComponentName name, IBinder service) {
@@ -127,13 +62,39 @@ public class IdleActivity extends Activity {
                     WakeUpService.WakeUpBinder binder = (WakeUpService.WakeUpBinder) service;
                     wakeService = binder.getService();
 
-                    //Aggiorno icona del bottone
-                    startButton.setImageResource(R.drawable.ic_pause_button);
-                    serviceStatus.setText("Servizio attivo");
-
                     //Controllo che il service sia connesso all'activity, e una volta fatto ciò connetto e ricevo i dati
                     if (wakeupBoundToActivity) {
-                        //ogni tot faccio partire l'activity
+
+                        new Handler().postDelayed(new Runnable() {
+
+                            @Override
+                            public void run() {
+
+
+                                if (wakeService.isConnected()) {
+
+                                    //Aggiorno icona del bottone
+                                    startButton.setImageResource(R.drawable.ic_pause_button);
+                                    serviceStatus.setText("Servizio attivo");
+
+                                } else {
+                                    //creo alertdialog e faccio terminare il servizio
+                                    new AlertDialog.Builder(IdleActivity.this)
+                                            .setTitle("Connessione non riuscita")
+                                            .setMessage("Impossibile connettersi al server.\n Riprova in un altro momento.")
+                                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    disconnectService();
+                                                }
+                                            })
+                                            .show();
+
+
+                                }
+                            }
+                        }, 500);
+
                     }
 
                 }
@@ -144,6 +105,9 @@ public class IdleActivity extends Activity {
                     wakeupBoundToActivity = false;
                 }
             };
+
+    //Definisco listener per la connessione
+    private ServiceConnectionListener listener = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -164,46 +128,14 @@ public class IdleActivity extends Activity {
             @Override
             public void onClick(View v) {
 
-                if(!(connBoundToActivity && wakeupBoundToActivity)){
-                    //Faccio partire i service
-
-                    //Faccio partire connection Service
-                    Intent connIntent = new Intent(IdleActivity.this, ConnectionService.class);
-                    bindService(connIntent,servConnection, Context.BIND_AUTO_CREATE);
-                    connBoundToActivity = true;
-
-                    //NOTA BENE: WakeUpService lo faccio partire solo dopo che ho ricevuto i dati da Connection Service.
-                    //SE li faccio partire insieme non posso mettere dei valori all'interno del service
-
-
+                if(!(wakeupBoundToActivity)){
+                    //Faccio partire il service
+                    Intent servIntent = new Intent(IdleActivity.this, WakeUpService.class);
+                    bindService(servIntent,wakeupConnection, Context.BIND_AUTO_CREATE);
+                    wakeupBoundToActivity = true;
                 }
                 else{
-
-                    //Scollego connectionservice
-                    if(connBoundToActivity){
-                        unbindService(servConnection);
-                        connBoundToActivity=false;
-                        connService.stopService(new Intent(IdleActivity.this,ConnectionService.class));
-                    }
-
-                    //Scollego wakeupservice
-                    if(wakeupBoundToActivity){
-                        unbindService(wakeupConnection);
-                        wakeupBoundToActivity=false;
-                        connService.stopService(new Intent(IdleActivity.this,WakeUpService.class));
-                    }
-
-                    //Aggiorno icona del bottone
-                    //NB: per qualche motivo oscuro, se faccio questo nel callback del servizio disconnesso, non funziona
-                    startButton.setImageResource(R.drawable.ic_play_button_sing);
-                    //aggiorno scritta in alto
-                    serviceStatus.setText("Servizio non attivo");
-
-                    //tolgo notification
-                    notificationmanager.cancel(NOTIFICATION_SERVICE_RUNNING_ID);
-
-
-
+                   disconnectService();
                 }
 
 
@@ -216,8 +148,8 @@ public class IdleActivity extends Activity {
     protected void onResume(){
         super.onResume();
 
-        //riprendo wakeupservice, se c'era già
-        if(connBoundToActivity && !wakeupBoundToActivity){
+        /*//riprendo wakeupservice, se c'era già
+        if(!wakeupBoundToActivity){
             //Faccio partire Wake Up Service
             Intent wakeupIntent = new Intent(IdleActivity.this, WakeUpService.class);
 
@@ -226,24 +158,7 @@ public class IdleActivity extends Activity {
 
             bindService(wakeupIntent,wakeupConnection, Context.BIND_AUTO_CREATE);
             wakeupBoundToActivity = true;
-        }
-
-        //Quando l'activity riprende, controllo se ho ricevuto altri dati dal raspberry
-        if(connBoundToActivity && (connService.getData()!=data)){
-            data=connService.getData();
-        }
-    }
-
-    @Override
-    protected void onStop(){
-        super.onStop();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-
-
-        if(wakeupBoundToActivity && prefs.getBoolean("active",false)) {
-            unbindService(wakeupConnection);
-            wakeupBoundToActivity = false;
-        }
+        }*/
     }
 
     @Override
@@ -253,11 +168,6 @@ public class IdleActivity extends Activity {
             unbindService(wakeupConnection);
             wakeupBoundToActivity=false;
             notificationmanager.cancel(NOTIFICATION_SERVICE_RUNNING_ID);
-        }
-
-        if(connBoundToActivity){
-            unbindService(servConnection);
-            connBoundToActivity=false;
         }
     }
 
@@ -283,7 +193,7 @@ public class IdleActivity extends Activity {
                     }
                 })
                 .show();
-    }
+    } //forse devi toglierlo
 
     private void showNotification(){
         //creo notifica che rimarrà finchè sarà attivo il service
@@ -311,5 +221,22 @@ public class IdleActivity extends Activity {
         notificationmanager.notify(NOTIFICATION_SERVICE_RUNNING_ID, notifica);
     }
 
+    public void disconnectService(){
+        //Scollego wakeupservice
+        if(wakeupBoundToActivity){
+            unbindService(wakeupConnection);
+            wakeupBoundToActivity=false;
+            wakeService.stopService(new Intent(IdleActivity.this,WakeUpService.class));
+        }
+
+        //Aggiorno icona del bottone
+        //NB: per qualche motivo oscuro, se faccio questo nel callback del servizio disconnesso, non funziona
+        startButton.setImageResource(R.drawable.ic_play_button_sing);
+        //aggiorno scritta in alto
+        serviceStatus.setText("Servizio non attivo");
+
+        //tolgo notification
+        notificationmanager.cancel(NOTIFICATION_SERVICE_RUNNING_ID);
+    }
 
 }
