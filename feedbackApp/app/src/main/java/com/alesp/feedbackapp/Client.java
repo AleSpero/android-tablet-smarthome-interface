@@ -58,12 +58,12 @@ public class Client {
     }
 
     public void send(String message){
-        try {
-            socketOutput.write(message.getBytes());
-        } catch (IOException e) {
-            if(listener!=null)
-                listener.onDisconnect(socket, e.getMessage());
-        }
+
+        //in questo metodo, per inviare i dati creo un nuovo thread con un runnable custom, che invierà i dati.
+
+        //faccio partire il thread
+        new Thread(new SendRunnable(message)).start();
+
     }
 
     private class ReceiveThread extends Thread implements Runnable{
@@ -81,12 +81,36 @@ public class Client {
         }
     }
 
+    //DEfinisco thread per inviare i dati, che verrà poi startato dal metodo "send" di wakeupservice.
+    //in queto caso ci sono 2 thread, uno per la ricezione e uno per l'invio: forse c'è modo di unificarli? investiga
+
     public void setConnectionListener(ConnectionListener listener){
         this.listener=listener;
     }
 
     public void removeConnectionListener(){
         this.listener=null;
+    }
+
+
+
+    private class SendRunnable implements Runnable {
+
+        //definisco il dato da inviare
+        private String data;
+
+        public SendRunnable(String message){
+            data=message;
+        }
+
+        public void run(){
+            try {
+                socketOutput.write(data.getBytes());
+            } catch (IOException e) {
+                if(listener!=null)
+                    listener.onDisconnect(socket, e.getMessage());
+            }
+        }
     }
 
 }

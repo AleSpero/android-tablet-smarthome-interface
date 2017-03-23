@@ -13,7 +13,7 @@
         >
 
         <TextView
-            android:text="Quale attività stai facendo?"
+            android:text="@string/whichActivity"
             android:fontFamily="sans-serif-thin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -23,7 +23,7 @@
             android:textColor="?android:attr/textColorTertiary" />
 
         <TextView
-            android:text="Tocca sull\'icona corrispondente o dì l\'attività a voce"
+            android:text="@string/whichDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="20sp"
@@ -35,7 +35,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_horizontal">
+            android:gravity="center_horizontal"
+            android:splitMotionEvents="false">
 
             <Button
                 android:id="@+id/first_activity"

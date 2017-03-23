@@ -20,6 +20,8 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.wang.avi.AVLoadingIndicatorView;
+
 import java.util.ArrayList;
 
 /**
@@ -27,6 +29,9 @@ import java.util.ArrayList;
  */
 
 public class IdleActivity extends Activity {
+
+
+
 
     //Inizializzo variabili per l'update della UI
     ImageButton startButton;
@@ -36,10 +41,11 @@ public class IdleActivity extends Activity {
     //ArrayList che contiene i dati scaricati
     String data;
 
+    AVLoadingIndicatorView avi;
+
     //Definisco il mio service e il boolean boundtoactivity per indicare se il processo
     // è collegato all'activity
     private WakeUpService wakeService;
-
     private boolean wakeupBoundToActivity = false;
 
     //variabili per notifiche
@@ -75,7 +81,9 @@ public class IdleActivity extends Activity {
 
                                     //Aggiorno icona del bottone
                                     startButton.setImageResource(R.drawable.ic_pause_button);
-                                    serviceStatus.setText("Servizio attivo");
+                                    serviceStatus.setText(R.string.listening);
+                                    avi.smoothToShow();
+                                    avi.setVisibility(View.VISIBLE);
 
                                 } else {
                                     //creo alertdialog e faccio terminare il servizio
@@ -106,8 +114,10 @@ public class IdleActivity extends Activity {
                 }
             };
 
-    //Definisco listener per la connessione
-    private ServiceConnectionListener listener = null;
+
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -118,6 +128,7 @@ public class IdleActivity extends Activity {
         startButton = (ImageButton) findViewById(R.id.start_service);
         settings = (ImageButton) findViewById(R.id.settings);
         serviceStatus = (TextView) findViewById(R.id.service_running);
+        avi = (AVLoadingIndicatorView) findViewById(R.id.avi);
 
         startButton.setImageResource(R.drawable.ic_play_button_sing);
         settings.setImageResource(R.drawable.ic_settings);
@@ -142,23 +153,22 @@ public class IdleActivity extends Activity {
             }
         });
 
+        //Setto listener per il tasto impostazioni
+        settings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                //Faccio partire settingsActivity
+                startActivity(new Intent(IdleActivity.this,SettingsActivity.class));
+
+            }
+        });
+
     }
 
     @Override
     protected void onResume(){
         super.onResume();
-
-        /*//riprendo wakeupservice, se c'era già
-        if(!wakeupBoundToActivity){
-            //Faccio partire Wake Up Service
-            Intent wakeupIntent = new Intent(IdleActivity.this, WakeUpService.class);
-
-            //Aggiungo dati da passare a WakeUpService
-            wakeupIntent.putExtra("receivedData",data);
-
-            bindService(wakeupIntent,wakeupConnection, Context.BIND_AUTO_CREATE);
-            wakeupBoundToActivity = true;
-        }*/
     }
 
     @Override
@@ -233,7 +243,9 @@ public class IdleActivity extends Activity {
         //NB: per qualche motivo oscuro, se faccio questo nel callback del servizio disconnesso, non funziona
         startButton.setImageResource(R.drawable.ic_play_button_sing);
         //aggiorno scritta in alto
-        serviceStatus.setText("Servizio non attivo");
+        serviceStatus.setText(R.string.notActive);
+        avi.smoothToHide();
+        avi.setVisibility(View.INVISIBLE);
 
         //tolgo notification
         notificationmanager.cancel(NOTIFICATION_SERVICE_RUNNING_ID);

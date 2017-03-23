@@ -34,8 +34,6 @@ public class WakeUpService extends Service {
     //intervallo tra un wakeup e l'altro
     long timeout = 20000;
 
-    private ServiceConnectionListener listener = null;
-
     //Variabili utilizzate per la connessione TCP
     Client client;
     private String ip = "159.149.152.242";
@@ -55,25 +53,6 @@ public class WakeUpService extends Service {
 
     @Override
     public IBinder onBind(Intent intent){
-
-       /* int i=0;
-
-        //Prendo l'array JSON da IdleActivity
-        try {
-            jsonArray = new JSONArray(intent.getExtras().getString("receivedData"));
-
-            //In questa parte di codice, ogni minuto apro l'activity per chiedere all'utente l'attività che sta eseguendo.
-            //se l'activity queryuser è attiva, allora "salto" e attendo un altro minuto, e così via. continuerò così finchè
-            //non avrò chiesto il feedback per tutte le attività presenti nel JSONArray.
-
-
-            //Il timer ripeterà una data operazione ogni tot tempo
-            new Timer().schedule(wakeUpTask,timeout,timeout);
-
-            } catch (JSONException e){
-            Log.e("onBind WakeupServ",e.toString());
-        }*/
-
         return binder;
     }
 
@@ -92,7 +71,7 @@ public class WakeUpService extends Service {
     @Override
     public void onDestroy(){
         super.onDestroy();
-        Log.d("WakeUpService","Servizio Chiuso");
+        Log.v("WakeUpService","Servizio Chiuso");
             client.disconnect();
     }
 
@@ -103,8 +82,17 @@ public class WakeUpService extends Service {
         return connected;
     }
 
-    public String sendData(){
-        return "da fare";
+    public boolean sendData(String message){
+
+        //in questo metodo invio i dati al raspberry.
+        if(isConnected()){
+            client.send(message);
+            return true;
+        }
+        else{
+            return false;
+        }
+
     }
 
     public boolean connect(){
@@ -119,7 +107,6 @@ public class WakeUpService extends Service {
                 @Override
                 public void onMessage(String message) {
                     Log.v("WakeUpService", "Ricevuto: " + message);
-                    connected = true;
 
                     //Se l'activity queryUser non è attiva, sveglio subito l'activity:
                     //altrimenti aspetto (?)
@@ -137,10 +124,9 @@ public class WakeUpService extends Service {
                         intent.setClassName("com.alesp.feedbackapp", "com.alesp.feedbackapp.QueryUser");
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
-                        //getApplicationContext().overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
                     }
                     else{
-                        //E qui?
+                        Log.d("WakeupService","Activity già aperta");//E qui?
                     }
 
 

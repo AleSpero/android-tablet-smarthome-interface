@@ -38,9 +38,13 @@ public class QueryUser extends Activity {
     //definisco altre variabili
     JSONObject receivedData;
     JSONObject maxObj;
+    JSONObject tempObj;
+    JSONObject selectedObj;
+
     JSONArray probActivities;
     JSONArray sortedActivities = new JSONArray();
     int maxIndex;
+
     //Questa variabile serve per tenere traccia del bottone other cliccato. se esso è stato cliccato, vuole dire che si stanno
     //guardando le attività 4-5-6 e quindi bisognerà riferirsi a quegli indici. altrimenti le attività interessate saranno la 1-2-3.
     boolean otherbuttonPressed = false;
@@ -50,8 +54,27 @@ public class QueryUser extends Activity {
 
     //Definisco il mio service e il boolean boundtoactivity per indicare se il processo
     // è collegato all'activity
-    ConnectionService connService;
-    boolean boundToActivity = false;
+    private WakeUpService wakeService;
+    private boolean wakeupBoundToActivity = false;
+
+    private ServiceConnection wakeupConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.d("WakeUpServ_QueryUs","Servizio connesso");
+
+            //Setto il flag boundtoprocess = true
+            wakeupBoundToActivity = true;
+
+            //Effettuo il collegamento (giusto?)
+            WakeUpService.WakeUpBinder binder = (WakeUpService.WakeUpBinder) service;
+            wakeService = binder.getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d("WakeUpServ_QueryUs","Servizio disconnesso");
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -63,6 +86,14 @@ public class QueryUser extends Activity {
         secondactivity = (Button) findViewById(R.id.second_activity);
         thirdactivity = (Button) findViewById(R.id.third_activity);
         otheractivity = (Button) findViewById(R.id.other);
+
+        //Effettuo il binding con WakeUpService
+        Intent servIntent = new Intent(QueryUser.this, WakeUpService.class);
+        bindService(servIntent,wakeupConnection, Context.BIND_AUTO_CREATE);
+        wakeupBoundToActivity = true;
+
+
+
 
             //Prendo il dato ricevuto dal service e lo trasformo in un oggetto JSON
             try {
@@ -107,7 +138,7 @@ public class QueryUser extends Activity {
                                 secondactivity.setText((String) sortedActivities.getJSONObject(1).get("activity"));
                                 thirdactivity.setText((String) sortedActivities.getJSONObject(2).get("activity"));
 
-                                otheractivity.setText("Altro");
+                                otheractivity.setText(R.string.other);
 
                                 //Faccio animazioni carine
                                 YoYo.with(Techniques.FadeIn)
@@ -135,7 +166,7 @@ public class QueryUser extends Activity {
                                 secondactivity.setText((String) sortedActivities.getJSONObject(4).get("activity"));
                                 thirdactivity.setText((String) sortedActivities.getJSONObject(5).get("activity"));
 
-                                otheractivity.setText("Indietro");
+                                otheractivity.setText(R.string.back);
 
                                 //Faccio animazioni carine
                                 YoYo.with(Techniques.FadeIn)
@@ -159,6 +190,101 @@ public class QueryUser extends Activity {
                         }
                     }
                 });
+
+
+                //setto listener per bottoni.
+
+                firstactivity.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        //questa variabile è utilizzata per controllare se è stato premuto il tasto "altro", qunidi se sono da
+                        //selezionare le prime 3 attività o le ultime 3.
+
+                        int index = !otherbuttonPressed ? 0 : 3;
+
+                        //Creo il JSON, e chiamo il servizio WakeUpService per inviarlo al server.
+                        try{
+                            //Prendo l'oggetto JSON dell'attività selezionata
+                            selectedObj = sortedActivities.getJSONObject(index);
+
+                            //Calcolo quanto tempo è passato dall'invio della richiesta all'input dell'utente.
+                            long offset = System.currentTimeMillis()-receivedData.getLong("time");
+
+                            tempObj = new JSONObject("{'requestId'='"+receivedData.get("requestId")+"', 'offset'='"+offset+"','result'='"+selectedObj.get("activity")+"'}");
+
+                            Log.d("Nuovo JSON",tempObj.toString());
+                        }
+                        catch (JSONException e){
+                            Log.e("WakeUpService",e.toString());
+                        }
+
+
+                        //Procedo con l'invio, segnalo la conferma del feedback e chiudo l'activity
+                        wakeService.sendData(tempObj.toString());
+
+                    }
+                });
+
+                secondactivity.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //questa variabile è utilizzata per controllare se è stato premuto il tasto "altro", qunidi se sono da
+                        //selezionare le prime 3 attività o le ultime 3.
+
+                        int index = !otherbuttonPressed ? 1 : 4;
+
+                        //Creo il JSON, e chiamo il servizio WakeUpService per inviarlo al server.
+                        try{
+                            //Prendo l'oggetto JSON dell'attività selezionata
+                            selectedObj = sortedActivities.getJSONObject(index);
+
+                            //Calcolo quanto tempo è passato dall'invio della richiesta all'input dell'utente.
+                            long offset = System.currentTimeMillis()-receivedData.getLong("time");
+
+                            tempObj = new JSONObject("{'requestId'='"+receivedData.get("requestId")+"', 'offset'='"+offset+"','result'='"+selectedObj.get("activity")+"'}");
+
+                            Log.d("Nuovo JSON",tempObj.toString());
+                        }
+                        catch (JSONException e){
+                            Log.e("WakeUpService",e.toString());
+                        }
+
+                        //Procedo con l'invio, segnalo la conferma del feedback e chiudo l'activity
+                        wakeService.sendData(tempObj.toString());
+                    }
+                });
+
+                thirdactivity.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //questa variabile è utilizzata per controllare se è stato premuto il tasto "altro", qunidi se sono da
+                        //selezionare le prime 3 attività o le ultime 3.
+
+                        int index = !otherbuttonPressed ? 2 : 5;
+
+                        //Creo il JSON, e chiamo il servizio WakeUpService per inviarlo al server.
+                        try{
+                            //Prendo l'oggetto JSON dell'attività selezionata
+                            selectedObj = sortedActivities.getJSONObject(index);
+
+                            //Calcolo quanto tempo è passato dall'invio della richiesta all'input dell'utente.
+                            long offset = System.currentTimeMillis()-receivedData.getLong("time");
+
+                            tempObj = new JSONObject("{'requestId'='"+receivedData.get("requestId")+"', 'offset'='"+offset+"','result'='"+selectedObj.get("activity")+"'}");
+
+                            Log.d("Nuovo JSON",tempObj.toString());
+                        }
+                        catch (JSONException e){
+                            Log.e("WakeUpService",e.toString());
+                        }
+
+                        //Procedo con l'invio, segnalo la conferma del feedback e chiudo l'activity
+                        wakeService.sendData(tempObj.toString());
+                    }
+                });
+
+                //invia activity, requestid, e timestamp
 
 
             }
@@ -197,5 +323,10 @@ public class QueryUser extends Activity {
         SharedPreferences.Editor ed = sp.edit();
         ed.putBoolean("active", false);
         ed.commit();
+
+        if(wakeupBoundToActivity){
+            unbindService(wakeupConnection);
+            wakeupBoundToActivity=false;
+        }
     }
 }

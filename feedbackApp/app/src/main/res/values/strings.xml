@@ -1,3 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">feedbackApp</string>
+    <string name="whichActivity">Which activity are you doing?</string>
+    <string name="controlPanel">Control Panel</string>
+    <string name="listening">Listening...</string>
+    <string name="notActive">Service not running</string>
+    <string name="whichDescription">Tocca sull\'icona corrispondente o dì l\'attività a voce</string>
+    <string name="settings">Settings</string>
+    <string name="back">Back</string>
+    <string name="other">Other</string>
+
 </resources>
