@@ -9,5 +9,6 @@
     <string name="settings">Impostazioni</string>
     <string name="back">Indietro</string>
     <string name="other">Altro</string>
+    <string name="feedbackReceived">Feedback Ricevuto!</string>
 
 </resources>

@@ -10,8 +10,10 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -22,6 +24,8 @@ import com.daimajia.androidanimations.library.YoYo;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Locale;
 
 /**
  * Created by alesp on 14/03/2017.
@@ -34,6 +38,9 @@ public class QueryUser extends Activity {
     Button secondactivity;
     Button thirdactivity;
     Button otheractivity;
+
+    //creo variabile per text to speech
+    TextToSpeech textToSpeech;
 
     //definisco altre variabili
     JSONObject receivedData;
@@ -93,7 +100,18 @@ public class QueryUser extends Activity {
         wakeupBoundToActivity = true;
 
 
+        //Inizializzo il TTS
+        textToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                //qui posso cambiare impostazioni, come il locale e altro
+                textToSpeech.setLanguage(Locale.getDefault());
+                Log.v("QueryUser","TTS inizializzato");
 
+                //Faccio partire la vocina
+                textToSpeech.speak(getString(R.string.whichActivity),TextToSpeech.QUEUE_FLUSH, null,null);
+            }
+        });
 
             //Prendo il dato ricevuto dal service e lo trasformo in un oggetto JSON
             try {
@@ -119,6 +137,8 @@ public class QueryUser extends Activity {
                     probActivities.remove(maxIndex);
 
                 }
+
+
 
                 //Aggiorno i bottoni con le attività più probabili
                 firstactivity.setText((String)sortedActivities.getJSONObject(0).get("activity"));
@@ -211,7 +231,7 @@ public class QueryUser extends Activity {
                             //Calcolo quanto tempo è passato dall'invio della richiesta all'input dell'utente.
                             long offset = System.currentTimeMillis()-receivedData.getLong("time");
 
-                            tempObj = new JSONObject("{'requestId'='"+receivedData.get("requestId")+"', 'offset'='"+offset+"','result'='"+selectedObj.get("activity")+"'}");
+                            tempObj = new JSONObject("{'requestId'="+receivedData.get("requestId")+", 'offset'="+offset+",'result'='"+selectedObj.get("activity")+"'}");
 
                             Log.d("Nuovo JSON",tempObj.toString());
                         }
@@ -222,6 +242,8 @@ public class QueryUser extends Activity {
 
                         //Procedo con l'invio, segnalo la conferma del feedback e chiudo l'activity
                         wakeService.sendData(tempObj.toString());
+
+                        animate();
 
                     }
                 });
@@ -242,7 +264,7 @@ public class QueryUser extends Activity {
                             //Calcolo quanto tempo è passato dall'invio della richiesta all'input dell'utente.
                             long offset = System.currentTimeMillis()-receivedData.getLong("time");
 
-                            tempObj = new JSONObject("{'requestId'='"+receivedData.get("requestId")+"', 'offset'='"+offset+"','result'='"+selectedObj.get("activity")+"'}");
+                            tempObj = new JSONObject("{'requestId'="+receivedData.get("requestId")+", 'offset'="+offset+",'result'='"+selectedObj.get("activity")+"'}");
 
                             Log.d("Nuovo JSON",tempObj.toString());
                         }
@@ -252,6 +274,8 @@ public class QueryUser extends Activity {
 
                         //Procedo con l'invio, segnalo la conferma del feedback e chiudo l'activity
                         wakeService.sendData(tempObj.toString());
+
+                        animate();
                     }
                 });
 
@@ -271,7 +295,7 @@ public class QueryUser extends Activity {
                             //Calcolo quanto tempo è passato dall'invio della richiesta all'input dell'utente.
                             long offset = System.currentTimeMillis()-receivedData.getLong("time");
 
-                            tempObj = new JSONObject("{'requestId'='"+receivedData.get("requestId")+"', 'offset'='"+offset+"','result'='"+selectedObj.get("activity")+"'}");
+                            tempObj = new JSONObject("{'requestId'="+receivedData.get("requestId")+", 'offset'="+offset+",'result'='"+selectedObj.get("activity")+"'}");
 
                             Log.d("Nuovo JSON",tempObj.toString());
                         }
@@ -281,16 +305,21 @@ public class QueryUser extends Activity {
 
                         //Procedo con l'invio, segnalo la conferma del feedback e chiudo l'activity
                         wakeService.sendData(tempObj.toString());
+
+                        animate();
+
+
                     }
                 });
 
-                //invia activity, requestid, e timestamp
 
 
             }
             catch(JSONException e){
                 Log.e("onServiceConnected",e.toString());
             }
+
+
 
     }
 
@@ -311,9 +340,12 @@ public class QueryUser extends Activity {
     }
 
     @Override
-    protected void onPause(){
-        super.onPause();
+    public void onResume(){
+        super.onResume();
+
+
     }
+
 
     @Override
     protected void onStop(){
@@ -324,9 +356,86 @@ public class QueryUser extends Activity {
         ed.putBoolean("active", false);
         ed.commit();
 
+        //Stoppo TTS
+        if (textToSpeech!=null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+        }
+
         if(wakeupBoundToActivity){
             unbindService(wakeupConnection);
             wakeupBoundToActivity=false;
         }
     }
+
+    public void animate(){
+        //Questo metodo contiene tutte le animazioni che vengono effettuate una volta toccata l'attività corrispondente.
+
+        //Faccio animazioni dei bottoni, ecc, che scompaiono, e poi li rimuovo
+
+        YoYo.with(Techniques.FadeOut)
+                .duration(700)
+                .playOn(firstactivity);
+
+        YoYo.with(Techniques.FadeOut)
+                .duration(700)
+                .playOn(secondactivity);
+
+        YoYo.with(Techniques.FadeOut)
+                .duration(700)
+                .playOn(thirdactivity);
+
+        YoYo.with(Techniques.FadeOut)
+                .duration(700)
+                .playOn(findViewById(R.id.other));
+
+        YoYo.with(Techniques.FadeOut)
+                .duration(700)
+                .playOn(findViewById(R.id.title));
+
+        YoYo.with(Techniques.FadeOut)
+                .duration(700)
+                .playOn(findViewById(R.id.titleDescr));
+
+        //Aspetto la fine dell'animazione, e rimuovo tutto
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //rimuovo i vari elementi dalla view, per fare posto alla scritta con "feedback ricevuto"
+                firstactivity.setVisibility(View.GONE);
+                secondactivity.setVisibility(View.GONE);
+                thirdactivity.setVisibility(View.GONE);
+                otheractivity.setVisibility(View.GONE);
+                findViewById(R.id.title).setVisibility(View.GONE);
+                findViewById(R.id.titleDescr).setVisibility(View.GONE);
+
+                //faccio comparire la scritta di feedback ricevuto
+                findViewById(R.id.feedbackReceived).setVisibility(View.VISIBLE);
+                YoYo.with(Techniques.FadeIn)
+                        .duration(700)
+                        .playOn(findViewById(R.id.feedbackReceived));
+
+                /*Faccio partire suono notifica
+                Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                r.play(); TROVA MODO DI CAMBIARE SUONERIA*/
+
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        //faccio passsare un secondo (o poco meno) e termino l'activity
+                        finish();
+                        overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
+                    }
+                },1200);
+
+            }
+        }, 700);
+
+
+
+
+    }
+
 }

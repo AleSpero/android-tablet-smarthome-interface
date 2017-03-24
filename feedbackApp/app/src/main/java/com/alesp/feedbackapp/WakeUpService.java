@@ -7,6 +7,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -14,6 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.Socket;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -28,12 +30,6 @@ public class WakeUpService extends Service {
 
     //UPDATE 22/03: WAkeupService viene integrato a connectionService: in questo modo esso gestisce anche la connessione con il server.
 
-    //Array JSON contenente i valori
-    JSONArray jsonArray;
-
-    //intervallo tra un wakeup e l'altro
-    long timeout = 20000;
-
     //Variabili utilizzate per la connessione TCP
     Client client;
     private String ip = "159.149.152.242";
@@ -43,9 +39,24 @@ public class WakeUpService extends Service {
 
     private final IBinder binder = new WakeUpBinder();
 
+    //creo variabile per text to speech
+    TextToSpeech textToSpeech;
+
     @Override
     public void onCreate(){
         super.onCreate();
+
+        //Inizializzo l'oggetto TextToSpeech che verrà utilizzato poi per
+        //far parlare il tablet
+        //NOTA BENE: faccio partire l'init alla creazione di wakeupservice, perchè ci vuole un po' di tempo per inizializzare
+        //il TTS engine. verrà poi passato l'oggetto tramite intent a QueryUser, che eseguirà il metodo speak
+        textToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                //qui posso cambiare impostazioni, come il locale e altro
+                textToSpeech.setLanguage(Locale.getDefault());
+            }
+        });
 
         //Eseguo connessione
         connect();
@@ -124,6 +135,8 @@ public class WakeUpService extends Service {
                         intent.setClassName("com.alesp.feedbackapp", "com.alesp.feedbackapp.QueryUser");
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
+
+
                     }
                     else{
                         Log.d("WakeupService","Activity già aperta");//E qui?
