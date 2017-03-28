@@ -40,7 +40,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:id="@+id/progress"/>
+            android:id="@+id/progress"
+            android:visibility="gone"/>
 
         </LinearLayout>
 
@@ -52,7 +53,7 @@
             android:id="@+id/feedbackReceived"
             android:textSize="70sp"
             android:textAlignment="center"
-            android:layout_marginTop="200dp"
+            android:layout_marginTop="150dp"
             android:textColor="?android:attr/textColorTertiary"
             android:visibility="gone"/>
 

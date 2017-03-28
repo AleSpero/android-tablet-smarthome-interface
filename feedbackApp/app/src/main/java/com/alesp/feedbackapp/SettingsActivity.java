@@ -18,6 +18,7 @@ public class SettingsActivity extends Activity {
     SharedPreferences.Editor edit;
 
     ImageButton about;
+    ImageButton microphone;
     ImageButton voice;
 
     boolean voiceEnabled = true;
@@ -28,12 +29,23 @@ public class SettingsActivity extends Activity {
         setContentView(R.layout.settings_activity);
 
         about = (ImageButton) findViewById(R.id.about);
-        voice = (ImageButton) findViewById(R.id.voice);
+        microphone = (ImageButton) findViewById(R.id.microphone);
 
-        voice.setImageResource(R.drawable.ic_volume_up_interface_symbol);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplication());
+
+
+        if(sp.getBoolean("voiceEnabled",true)){
+            microphone.setImageResource(R.drawable.ic_microphone);
+        }
+        else{
+            voiceEnabled = false;
+            microphone.setImageResource(R.drawable.ic_muted);
+        }
+
         about.setImageResource(R.drawable.ic_info);
 
-        voice.setOnClickListener(new View.OnClickListener() {
+
+        microphone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -46,7 +58,7 @@ public class SettingsActivity extends Activity {
                     edit.putBoolean("voiceEnabled", true);
 
                     //cambio icona
-                    voice.setImageResource(R.drawable.ic_volume_up_interface_symbol);
+                    microphone.setImageResource(R.drawable.ic_microphone);
 
                     voiceEnabled = true;
                 }
@@ -54,7 +66,7 @@ public class SettingsActivity extends Activity {
                     edit.putBoolean("voiceEnabled", false);
 
                     //cambio icona
-                    voice.setImageResource(R.drawable.ic_volume_off);
+                    microphone.setImageResource(R.drawable.ic_muted);
 
                     voiceEnabled = false;
                 }

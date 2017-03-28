@@ -11,5 +11,7 @@
     <string name="other">Altro</string>
     <string name="feedbackReceived">Feedback Ricevuto!</string>
     <string name="retry">Non ho capito. Ripeti</string>
+    <string name="voicerecognition">Riconoscimento Vocale</string>
+    <string name="about">Informazioni</string>
 
 </resources>

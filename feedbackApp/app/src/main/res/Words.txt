@@ -1,0 +1,6 @@
+TAKE MEDICINE:PRENDERE/PRENDENDO/PRESO, gocce, pastiglia/e, supposta, effervescente, mal di gola, antinfiammatorio, antistaminico, antidolorifico, antipiretico, decongestionante, tosse,efferalgan, tachipirina, aspirina, augmentin, aulin, cuore, fegato, gola, polmoni, febbre
+MAKE BREAKFAST: PREPARANDO,COLAZIONE,FACENDO,FARE,FATTO mangiare, pappando,mi sto facendo, caffè, cappuccino, te, the, latte, soia, brioche,cornetto,arancia, uova/o, strapazzate, bacon, pancetta, salsiccia, bombolone, kraphen, biscotto/i, plum cake, torta, tortina, scaldando, muffin
+MAKE LUNCH: PRANZO/PRANZANDO, mangiando/are, pasta, pizza, fusilli, penne, pesto, pomodoro, insalata, bistecca, carne, pesce, preparando, acqua, hamburger, pizza,formaggio, salumi, panino, piadina, kebab
+EATING: MANGIANDO/MANGIARE + quelli di breakfast e lunch con relevance minore
+SETUP_TABLE:APPARECCHIA/NDO/TO, METTERE/NDO, PREPARANDO (se + tavola allora aumenta setuptable) FACENDO, TAVOLA, posate, bicchiere, forchetta, coltello, tovaglietta 
+CLEAR_TABLE:SPARECCHIA/NDO/TO, TOGLIERE/NDO, PULIRE/ENDO/ITO, boh

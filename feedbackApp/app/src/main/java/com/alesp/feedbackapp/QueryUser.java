@@ -27,6 +27,7 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
@@ -55,6 +56,7 @@ public class QueryUser extends Activity implements RecognitionListener{
     Button thirdactivity;
     Button otheractivity;
     RecognitionProgressView progress;
+    TextView titledescr;
 
     //creo variabile per text to speech
     TextToSpeech textToSpeech;
@@ -68,6 +70,8 @@ public class QueryUser extends Activity implements RecognitionListener{
     JSONArray probActivities;
     JSONArray sortedActivities = new JSONArray();
     int maxIndex;
+
+    SharedPreferences sp;
 
     //definisco variabile per il riconoscimento vocale
     SpeechRecognizer recognizer;
@@ -115,25 +119,39 @@ public class QueryUser extends Activity implements RecognitionListener{
         thirdactivity = (Button) findViewById(R.id.third_activity);
         otheractivity = (Button) findViewById(R.id.other);
         progress = (RecognitionProgressView) findViewById(R.id.progress);
+        titledescr = (TextView) findViewById(R.id.titleDescr);
 
         //Effettuo il binding con WakeUpService
         Intent servIntent = new Intent(QueryUser.this, WakeUpService.class);
         bindService(servIntent,wakeupConnection, Context.BIND_AUTO_CREATE);
         wakeupBoundToActivity = true;
 
-        //Setto intent per lo speechrecognizer
-        recognitionIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        recognitionIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        recognitionIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-        recognitionIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
+        //Prendo sharedpreferences
+         sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
 
-        //Inizializzo lo speech recognizer e setto il RecognitionprogressView
-        recognizer = SpeechRecognizer.createSpeechRecognizer(this);
-        recognizer.setRecognitionListener(this);
-        progress.setSpeechRecognizer(recognizer);
-        progress.setRecognitionListener(this);
+        //Se l'opzione per lo speechrecognizer è attiva
+        if(sp.getBoolean("voiceEnabled",true)) {
+            //Setto intent per lo speechrecognizer
+            recognitionIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            recognitionIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            recognitionIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+            recognitionIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
+
+
+            //Inizializzo lo speech recognizer e setto il RecognitionprogressView
+            recognizer = SpeechRecognizer.createSpeechRecognizer(this);
+            recognizer.setRecognitionListener(this);
+            progress.setSpeechRecognizer(recognizer);
+            progress.setRecognitionListener(this);
+
+            progress.setVisibility(View.VISIBLE);
+
+
+        }
+
+
 
         //Inizializo grafica speechrecognizerview
         int[] colors = {
@@ -151,63 +169,67 @@ public class QueryUser extends Activity implements RecognitionListener{
         progress.play();
 
 
-        //Inizializzo il TTS
-        textToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                //qui posso cambiare impostazioni, come il locale e altro
-                textToSpeech.setLanguage(Locale.getDefault());
-                Log.v("QueryUser","TTS inizializzato");
 
-                //Faccio partire la vocina
-                textToSpeech.speak(getString(R.string.whichActivity),TextToSpeech.QUEUE_FLUSH, null,"WHICH_ACTIVITY");
+        //Inizializzo il TTS (Se lla voce è attiva nelle impostazioni)
+        if(sp.getBoolean("voiceEnabled",true)) {
+            textToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+                @Override
+                public void onInit(int status) {
+                    //qui posso cambiare impostazioni, come il locale e altro
+                    textToSpeech.setLanguage(Locale.getDefault());
+                    Log.v("QueryUser", "TTS inizializzato");
 
-                //Faccio partire listener una volta che il TTS finisce di parlare
-                textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-                    @Override
-                    public void onStart(String utteranceId) {
+                    //Faccio partire la vocina
+                    textToSpeech.speak(getString(R.string.whichActivity), TextToSpeech.QUEUE_FLUSH, null, "WHICH_ACTIVITY");
 
-                    }
-
-                    @Override
-                    public void onDone(String utteranceId) {
-                        //Quando finisco di pronunciare la frase, inizio con il listening
-
-                        //NOTA BENE: per qualche motivo strano questo codice è eseguito in un altro thread. mi tocca fare un runonuithread per far
-                        //andare lo speech recognizer.
-
-
-                        switch (utteranceId){
-                            case "WHICH_ACTIVITY":
-                            case "RETRY":
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-
-                                        //faccio partire il listening
-                                        startRecognition();
-
-                                        progress.postDelayed(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                startRecognition();
-                                            }
-                                        }, 50);
-                                    }
-                                });
-
-                                break;
+                    //Faccio partire listener una volta che il TTS finisce di parlare
+                    textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                        @Override
+                        public void onStart(String utteranceId) {
 
                         }
-                    }
 
-                    @Override
-                    public void onError(String utteranceId) {
+                        @Override
+                        public void onDone(String utteranceId) {
+                            //Quando finisco di pronunciare la frase, inizio con il listening
 
-                    }
-                });
-            }
-        });
+                            //NOTA BENE: per qualche motivo strano questo codice è eseguito in un altro thread. mi tocca fare un runonuithread per far
+                            //andare lo speech recognizer.
+
+
+                            switch (utteranceId) {
+                                case "WHICH_ACTIVITY":
+                                case "RETRY":
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+
+                                            //faccio partire il listening
+                                            startRecognition();
+
+                                            progress.postDelayed(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    startRecognition();
+                                                }
+                                            }, 50);
+                                        }
+                                    });
+
+                                    break;
+
+                            }
+                        }
+
+                        @Override
+                        public void onError(String utteranceId) {
+
+                        }
+                    });
+                }
+            });
+        }
+
 
             //Prendo il dato ricevuto dal service e lo trasformo in un oggetto JSON
             try {
@@ -465,6 +487,17 @@ public class QueryUser extends Activity implements RecognitionListener{
     public void animate(){
         //Questo metodo contiene tutte le animazioni che vengono effettuate una volta toccata l'attività corrispondente.
 
+        if(sp.getBoolean("voiceEnabled",true)) {
+
+            YoYo.with(Techniques.FadeOut)
+                    .duration(700)
+                    .playOn(progress);
+
+            //Stoppo speechview e recognizer
+            progress.stop();
+            recognizer.destroy();
+        }
+
         //Faccio animazioni dei bottoni, ecc, che scompaiono, e poi li rimuovo
 
         YoYo.with(Techniques.FadeOut)
@@ -491,10 +524,13 @@ public class QueryUser extends Activity implements RecognitionListener{
                 .duration(700)
                 .playOn(findViewById(R.id.titleDescr));
 
+
+
         //Aspetto la fine dell'animazione, e rimuovo tutto
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+
                 //rimuovo i vari elementi dalla view, per fare posto alla scritta con "feedback ricevuto"
                 firstactivity.setVisibility(View.GONE);
                 secondactivity.setVisibility(View.GONE);
@@ -502,6 +538,7 @@ public class QueryUser extends Activity implements RecognitionListener{
                 otheractivity.setVisibility(View.GONE);
                 findViewById(R.id.title).setVisibility(View.GONE);
                 findViewById(R.id.titleDescr).setVisibility(View.GONE);
+                progress.setVisibility(View.GONE);
 
                 //faccio comparire la scritta di feedback ricevuto
                 findViewById(R.id.feedbackReceived).setVisibility(View.VISIBLE);
@@ -629,7 +666,12 @@ public class QueryUser extends Activity implements RecognitionListener{
 
     @Override
     public void onPartialResults(Bundle arg0) {
-        Log.i("QueryUser", "onPartialResults");
+        //qui gestisco i risultati.
+        ArrayList<String> matches = arg0
+                .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+
+        titledescr.setText(titledescr.getText().toString()+matches.get(0));
+        Log.i("QueryUser","onPartialResults");
         //qui gestisco i risultati.
     }
 
@@ -645,6 +687,7 @@ public class QueryUser extends Activity implements RecognitionListener{
         ArrayList<String> matches = results
                 .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
         Log.d("QueryUser",matches.toString());
+        titledescr.setText(matches.get(0));
     }
 
     @Override

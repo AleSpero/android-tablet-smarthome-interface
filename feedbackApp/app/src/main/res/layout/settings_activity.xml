@@ -34,8 +34,13 @@
             android:gravity="center_horizontal"
             android:splitMotionEvents="false">
 
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
             <ImageButton
-                android:id="@+id/voice"
+                android:id="@+id/microphone"
 
                 android:text="Button"
                 android:textColor="?android:attr/textColorTertiary"
@@ -49,6 +54,21 @@
                 android:adjustViewBounds="true"
                 android:padding="50dp"
                 android:scaleType="fitCenter"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/voicerecognition"
+                    android:fontFamily="sans-serif-thin"
+                    android:textSize="25sp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginTop="10dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
             <ImageButton
                 android:id="@+id/about"
@@ -66,6 +86,15 @@
 
                 android:textColor="?android:attr/textColorTertiary" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/about"
+                    android:fontFamily="sans-serif-thin"
+                    android:textSize="25sp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="10dp"/>
+                </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>
