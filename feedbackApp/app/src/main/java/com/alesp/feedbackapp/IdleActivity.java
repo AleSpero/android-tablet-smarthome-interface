@@ -166,10 +166,12 @@ public class IdleActivity extends Activity {
 
                 //Faccio partire settingsActivity
                 startActivity(new Intent(IdleActivity.this,SettingsActivity.class));
-                overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
+                //overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
 
             }
         });
+
+
 
     }
 

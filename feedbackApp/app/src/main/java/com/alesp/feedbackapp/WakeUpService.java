@@ -41,22 +41,11 @@ public class WakeUpService extends Service {
 
     //creo variabile per text to speech
     TextToSpeech textToSpeech;
+    //FORSE TOGLI
 
     @Override
     public void onCreate(){
         super.onCreate();
-
-        //Inizializzo l'oggetto TextToSpeech che verrà utilizzato poi per
-        //far parlare il tablet
-        //NOTA BENE: faccio partire l'init alla creazione di wakeupservice, perchè ci vuole un po' di tempo per inizializzare
-        //il TTS engine. verrà poi passato l'oggetto tramite intent a QueryUser, che eseguirà il metodo speak
-        textToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                //qui posso cambiare impostazioni, come il locale e altro
-                textToSpeech.setLanguage(Locale.getDefault());
-            }
-        });
 
         //Eseguo connessione
         connect();

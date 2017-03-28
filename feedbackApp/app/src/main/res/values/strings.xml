@@ -10,6 +10,7 @@
     <string name="back">Back</string>
     <string name="other">Other</string>
     <string name="feedbackReceived">Thanks for your feedback!</string>
+    <string name="retry">Didn\'t understand. Please try again</string>
 
 
 </resources>

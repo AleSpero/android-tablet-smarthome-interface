@@ -10,5 +10,6 @@
     <string name="back">Indietro</string>
     <string name="other">Altro</string>
     <string name="feedbackReceived">Feedback Ricevuto!</string>
+    <string name="retry">Non ho capito. Ripeti</string>
 
 </resources>

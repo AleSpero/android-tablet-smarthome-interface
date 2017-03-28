@@ -1,11 +1,14 @@
 package com.alesp.feedbackapp;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -13,31 +16,45 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
+import com.github.zagum.speechrecognitionview.RecognitionBar;
+import com.github.zagum.speechrecognitionview.RecognitionProgressView;
+import com.github.zagum.speechrecognitionview.adapters.RecognitionListenerAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 /**
  * Created by alesp on 14/03/2017.
  */
 
-public class QueryUser extends Activity {
+public class QueryUser extends Activity implements RecognitionListener{
+
+    //Nota bene: implemento l'interfaccia RecognitionListener e definisco i vari metodi per la speechRecognition.
 
     //Definisco variabili per la UI
     Button firstactivity;
     Button secondactivity;
     Button thirdactivity;
     Button otheractivity;
+    RecognitionProgressView progress;
 
     //creo variabile per text to speech
     TextToSpeech textToSpeech;
@@ -51,6 +68,10 @@ public class QueryUser extends Activity {
     JSONArray probActivities;
     JSONArray sortedActivities = new JSONArray();
     int maxIndex;
+
+    //definisco variabile per il riconoscimento vocale
+    SpeechRecognizer recognizer;
+    Intent recognitionIntent;
 
     //Questa variabile serve per tenere traccia del bottone other cliccato. se esso è stato cliccato, vuole dire che si stanno
     //guardando le attività 4-5-6 e quindi bisognerà riferirsi a quegli indici. altrimenti le attività interessate saranno la 1-2-3.
@@ -93,11 +114,41 @@ public class QueryUser extends Activity {
         secondactivity = (Button) findViewById(R.id.second_activity);
         thirdactivity = (Button) findViewById(R.id.third_activity);
         otheractivity = (Button) findViewById(R.id.other);
+        progress = (RecognitionProgressView) findViewById(R.id.progress);
 
         //Effettuo il binding con WakeUpService
         Intent servIntent = new Intent(QueryUser.this, WakeUpService.class);
         bindService(servIntent,wakeupConnection, Context.BIND_AUTO_CREATE);
         wakeupBoundToActivity = true;
+
+        //Setto intent per lo speechrecognizer
+        recognitionIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        recognitionIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        recognitionIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        recognitionIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
+
+
+        //Inizializzo lo speech recognizer e setto il RecognitionprogressView
+        recognizer = SpeechRecognizer.createSpeechRecognizer(this);
+        recognizer.setRecognitionListener(this);
+        progress.setSpeechRecognizer(recognizer);
+        progress.setRecognitionListener(this);
+
+        //Inizializo grafica speechrecognizerview
+        int[] colors = {
+                ContextCompat.getColor(this, R.color.color1),
+                ContextCompat.getColor(this, R.color.color2),
+                ContextCompat.getColor(this, R.color.color3),
+                ContextCompat.getColor(this, R.color.color4),
+                ContextCompat.getColor(this, R.color.color5)
+        };
+
+        int[] heights = {60, 76, 58, 80, 55};
+
+        progress.setColors(colors);
+        progress.setBarMaxHeightsInDp(heights);
+        progress.play();
 
 
         //Inizializzo il TTS
@@ -109,7 +160,52 @@ public class QueryUser extends Activity {
                 Log.v("QueryUser","TTS inizializzato");
 
                 //Faccio partire la vocina
-                textToSpeech.speak(getString(R.string.whichActivity),TextToSpeech.QUEUE_FLUSH, null,null);
+                textToSpeech.speak(getString(R.string.whichActivity),TextToSpeech.QUEUE_FLUSH, null,"WHICH_ACTIVITY");
+
+                //Faccio partire listener una volta che il TTS finisce di parlare
+                textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                    @Override
+                    public void onStart(String utteranceId) {
+
+                    }
+
+                    @Override
+                    public void onDone(String utteranceId) {
+                        //Quando finisco di pronunciare la frase, inizio con il listening
+
+                        //NOTA BENE: per qualche motivo strano questo codice è eseguito in un altro thread. mi tocca fare un runonuithread per far
+                        //andare lo speech recognizer.
+
+
+                        switch (utteranceId){
+                            case "WHICH_ACTIVITY":
+                            case "RETRY":
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+
+                                        //faccio partire il listening
+                                        startRecognition();
+
+                                        progress.postDelayed(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                startRecognition();
+                                            }
+                                        }, 50);
+                                    }
+                                });
+
+                                break;
+
+                        }
+                    }
+
+                    @Override
+                    public void onError(String utteranceId) {
+
+                    }
+                });
             }
         });
 
@@ -340,14 +436,6 @@ public class QueryUser extends Activity {
     }
 
     @Override
-    public void onResume(){
-        super.onResume();
-
-
-    }
-
-
-    @Override
     protected void onStop(){
         super.onStop();
 
@@ -365,6 +453,12 @@ public class QueryUser extends Activity {
         if(wakeupBoundToActivity){
             unbindService(wakeupConnection);
             wakeupBoundToActivity=false;
+        }
+
+        //Stoppo speechrecognition
+        if (recognizer != null) {
+            recognizer.destroy();
+            Log.v("QueryUser","Recognizer stoppato");
         }
     }
 
@@ -435,6 +529,127 @@ public class QueryUser extends Activity {
 
 
 
+
+    }
+
+
+
+    //INIZIO METODI PER LA SPEECH RECOGNITION
+
+    //in questo metodo faccio partire il listening, imposto l'icona e faccio partire il suono
+    public void startRecognition(){
+        recognizer.startListening(recognitionIntent);
+    }
+
+    @Override
+    public void onBeginningOfSpeech() {
+        Log.i("QueryUser", "onBeginningOfSpeech");
+
+    }
+
+    @Override
+    public void onBufferReceived(byte[] buffer) {
+        Log.i("QueryUser", "onBufferReceived: " + buffer);
+    }
+
+    @Override
+    public void onEndOfSpeech() {
+        Log.i("QueryUser", "onEndOfSpeech");;
+    }
+
+    @Override
+    public void onError(int errorCode) {
+        String message = "No Input";
+
+        //controllo i vari codici di errore ed agisco di conseguenza
+        switch (errorCode) {
+            case SpeechRecognizer.ERROR_AUDIO:
+                message = "Audio recording error";
+                break;
+            case SpeechRecognizer.ERROR_CLIENT:
+                message = "Client side error";
+                break;
+            case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
+                //Se non ho la permission, la chiedo all'utente
+                //Controllo se l'app ha il permesso di utilizzare il microfono, altrimenti lo chiedo.
+                //Ciò è indispenabile per il riconoscimento vocale (altrimento non funziona
+
+                //controllo permission
+                if (ContextCompat.checkSelfPermission(QueryUser.this,
+                        Manifest.permission.RECORD_AUDIO)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+                        ActivityCompat.requestPermissions(QueryUser.this,
+                                new String[]{Manifest.permission.RECORD_AUDIO},
+                                0);
+                    recognizer.stopListening();
+                    startRecognition();
+
+                }
+
+                message = "Insufficient permissions";
+                break;
+
+            case SpeechRecognizer.ERROR_NETWORK:
+            case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
+                message = "Network error";
+                //esco da queryUser
+                new AlertDialog.Builder(QueryUser.this)
+                        .setTitle("Connessione non riuscita")
+                        .setMessage("Impossibile connettersi al server.\n Riprova in un altro momento.")
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                            }
+                        })
+                        .show();
+                break;
+            case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
+                message = "RecognitionService busy";
+                break;
+            case SpeechRecognizer.ERROR_SERVER:
+                message = "error from server";
+                break;
+            default:
+                //Dico all'utente che il tablet "non ha capito" e riprovo
+                textToSpeech.speak(getString(R.string.retry),TextToSpeech.QUEUE_ADD,null,"RETRY");
+                progress.stop();
+                progress.play();
+                break;
+        }
+        Log.e("QueryUser", "FAILED " + message);
+
+    }
+
+    @Override
+    public void onEvent(int arg0, Bundle arg1) {
+        Log.i("QueryUser", "onEvent");
+    }
+
+    @Override
+    public void onPartialResults(Bundle arg0) {
+        Log.i("QueryUser", "onPartialResults");
+        //qui gestisco i risultati.
+    }
+
+    @Override
+    public void onReadyForSpeech(Bundle arg0) {
+        Log.i("QueryUser", "onReadyForSpeech");
+    }
+
+    @Override
+    public void onResults(Bundle results) {
+        Log.i("QueryUser", "onResults");
+        //qui gestisco i risultati.
+        ArrayList<String> matches = results
+                .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+        Log.d("QueryUser",matches.toString());
+    }
+
+    @Override
+    public void onRmsChanged(float rmsdB) {
+        //Log.i("QueryUser", "onRmsChanged: " + rmsdB);
 
     }
 

@@ -30,6 +30,20 @@
             android:textAlignment="center"
             android:id="@+id/titleDescr" />
 
+        <LinearLayout
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_gravity="center_horizontal">
+
+        <com.github.zagum.speechrecognitionview.RecognitionProgressView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:id="@+id/progress"/>
+
+        </LinearLayout>
+
         <TextView
             android:text="@string/feedbackReceived"
             android:fontFamily="sans-serif-thin"
@@ -43,7 +57,7 @@
             android:visibility="gone"/>
 
         <LinearLayout
-            android:layout_marginTop="70dp"
+            android:layout_marginTop="30dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
