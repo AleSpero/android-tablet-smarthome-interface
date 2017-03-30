@@ -46,7 +46,7 @@ import java.util.Locale;
  * Created by alesp on 14/03/2017.
  */
 
-public class QueryUser extends Activity implements RecognitionListener{
+public class QueryUser extends Activity implements RecognitionListener {
 
     //Nota bene: implemento l'interfaccia RecognitionListener e definisco i vari metodi per la speechRecognition.
 
@@ -56,10 +56,14 @@ public class QueryUser extends Activity implements RecognitionListener{
     Button thirdactivity;
     Button otheractivity;
     RecognitionProgressView progress;
-    TextView titledescr;
+    TextView userinput;
 
     //creo variabile per text to speech
     TextToSpeech textToSpeech;
+
+    //Creo costanti per l'attività selezionata
+    static int FIRST_ACTIVITY = 0;
+    static int SECOND_ACTIVITY = 1;
 
     //definisco altre variabili
     JSONObject receivedData;
@@ -92,7 +96,7 @@ public class QueryUser extends Activity implements RecognitionListener{
     private ServiceConnection wakeupConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d("WakeUpServ_QueryUs","Servizio connesso");
+            Log.d("WakeUpServ_QueryUs", "Servizio connesso");
 
             //Setto il flag boundtoprocess = true
             wakeupBoundToActivity = true;
@@ -104,38 +108,40 @@ public class QueryUser extends Activity implements RecognitionListener{
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.d("WakeUpServ_QueryUs","Servizio disconnesso");
+            Log.d("WakeUpServ_QueryUs", "Servizio disconnesso");
         }
     };
 
+
     @Override
-    protected void onCreate(Bundle savedInstanceState){
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.query_user);
 
         //faccio collegamenti vari
         firstactivity = (Button) findViewById(R.id.first_activity);
         secondactivity = (Button) findViewById(R.id.second_activity);
-        thirdactivity = (Button) findViewById(R.id.third_activity);
-        otheractivity = (Button) findViewById(R.id.other);
+        // thirdactivity = (Button) findViewById(R.id.third_activity);
+        // otheractivity = (Button) findViewById(R.id.other);
         progress = (RecognitionProgressView) findViewById(R.id.progress);
-        titledescr = (TextView) findViewById(R.id.titleDescr);
+        userinput = (TextView) findViewById(R.id.userinput);
 
         //Effettuo il binding con WakeUpService
         Intent servIntent = new Intent(QueryUser.this, WakeUpService.class);
-        bindService(servIntent,wakeupConnection, Context.BIND_AUTO_CREATE);
+        bindService(servIntent, wakeupConnection, Context.BIND_AUTO_CREATE);
         wakeupBoundToActivity = true;
 
         //Prendo sharedpreferences
-         sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
 
         //Se l'opzione per lo speechrecognizer è attiva
-        if(sp.getBoolean("voiceEnabled",true)) {
+        if (sp.getBoolean("voiceEnabled", true)) {
             //Setto intent per lo speechrecognizer
             recognitionIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
             recognitionIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                     RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            recognitionIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
             recognitionIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
             recognitionIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
 
@@ -150,7 +156,6 @@ public class QueryUser extends Activity implements RecognitionListener{
 
 
         }
-
 
 
         //Inizializo grafica speechrecognizerview
@@ -169,9 +174,8 @@ public class QueryUser extends Activity implements RecognitionListener{
         progress.play();
 
 
-
         //Inizializzo il TTS (Se lla voce è attiva nelle impostazioni)
-        if(sp.getBoolean("voiceEnabled",true)) {
+        if (sp.getBoolean("voiceEnabled", true)) {
             textToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
                 @Override
                 public void onInit(int status) {
@@ -199,7 +203,32 @@ public class QueryUser extends Activity implements RecognitionListener{
 
                             switch (utteranceId) {
                                 case "WHICH_ACTIVITY":
+                                    textToSpeech.speak("Are you " + firstactivity.getText().toString()
+                                            + " ?", TextToSpeech.QUEUE_ADD, null, null);
+                                    textToSpeech.speak("Or are you" + secondactivity.getText().toString() + " ?", TextToSpeech.QUEUE_ADD, null, "SPECIFIC");
+                                    break;
+
+                                case "SPECIFIC":
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+
+                                            //faccio partire il listening
+                                            //startRecognition();
+
+                                            progress.postDelayed(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    startRecognition();
+                                                }
+                                            }, 50);
+                                        }
+                                    });
+                                    break;
+
                                 case "RETRY":
+
+                                    //qua è da modificare
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -231,41 +260,47 @@ public class QueryUser extends Activity implements RecognitionListener{
         }
 
 
-            //Prendo il dato ricevuto dal service e lo trasformo in un oggetto JSON
-            try {
-                datafromService = getIntent().getExtras();
-               // probActivities = new JSONArray(datafromService.getString("Data")).getJSONArray(1);
-                receivedData = new JSONObject(datafromService.getString("Data"));
-                probActivities = (JSONArray) receivedData.get("data");
-                maxObj = new JSONObject("{'activity':'lol','probability':0.0}");
+        //Prendo il dato ricevuto dal service e lo trasformo in un oggetto JSON
+        try {
+            datafromService = getIntent().getExtras();
+            // probActivities = new JSONArray(datafromService.getString("Data")).getJSONArray(1);
+            receivedData = new JSONObject(datafromService.getString("Data"));
+            probActivities = (JSONArray) receivedData.get("data");
+            maxObj = new JSONObject("{'activity':'lol','probability':0.0}");
 
-                //Costruisco un nuovo JSONArray con le attività ordinate in modo descrescente per la probabilità
-                while(probActivities.length()!=0){
+            //Costruisco un nuovo JSONArray con le attività ordinate in modo descrescente per la probabilità
+            while (probActivities.length() != 0) {
 
-                    for (int i = 0; i < probActivities.length(); i++) {
-                        if (probActivities.getJSONObject(i).getDouble("probability") > maxObj.getDouble("probability")) {
-                            maxObj = probActivities.getJSONObject(i);
-                            maxIndex = i;
-                        }
+                for (int i = 0; i < probActivities.length(); i++) {
+                    if (probActivities.getJSONObject(i).getDouble("probability") > maxObj.getDouble("probability")) {
+                        maxObj = probActivities.getJSONObject(i);
+                        maxIndex = i;
                     }
-
-                    //Calcolo il max dell'array, e una volta inserito nel nuovo array, lo cancello dal vecchio
-                    sortedActivities.put(maxObj);
-                    maxObj = new JSONObject("{'activity':'lol','probability':0.0}");
-                    probActivities.remove(maxIndex);
-
                 }
 
+                //Calcolo il max dell'array, e una volta inserito nel nuovo array, lo cancello dal vecchio
+                sortedActivities.put(maxObj);
+                maxObj = new JSONObject("{'activity':'lol','probability':0.0}");
+                probActivities.remove(maxIndex);
+
+            }
 
 
-                //Aggiorno i bottoni con le attività più probabili
-                firstactivity.setText((String)sortedActivities.getJSONObject(0).get("activity"));
-                secondactivity.setText((String)sortedActivities.getJSONObject(1).get("activity"));
-                thirdactivity.setText((String)sortedActivities.getJSONObject(2).get("activity"));
+            //Aggiorno i bottoni con le attività più probabili
+            firstactivity.setText((String) sortedActivities.getJSONObject(0).get("activity"));
+            secondactivity.setText((String) sortedActivities.getJSONObject(1).get("activity"));
+            //thirdactivity.setText((String)sortedActivities.getJSONObject(2).get("activity"));
 
 
-                //Setto gli onclick listener per il bottone other (che cambia i primi 3 bottoni) e gli altri bottoni
-                otheractivity.setOnClickListener(new View.OnClickListener() {
+            //Setto gli onclick listener per il bottone other (che cambia i primi 3 bottoni) e gli altri bottoni
+               /*
+
+
+               QUESTO NON SERVE, SICCOME FACCIO VEDERE SOLO 2 ATTIVITA'. tuttavia non lo tolgo (per ora)
+
+
+
+               otheractivity.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         //se "altro" è già stato premuto, allora esso fungerà da tasto "back". e quindi displayerà le prime 3 attività.
@@ -274,7 +309,7 @@ public class QueryUser extends Activity implements RecognitionListener{
                             try {
                                 firstactivity.setText((String) sortedActivities.getJSONObject(0).get("activity"));
                                 secondactivity.setText((String) sortedActivities.getJSONObject(1).get("activity"));
-                                thirdactivity.setText((String) sortedActivities.getJSONObject(2).get("activity"));
+                                //thirdactivity.setText((String) sortedActivities.getJSONObject(2).get("activity"));
 
                                 otheractivity.setText(R.string.other);
 
@@ -302,7 +337,7 @@ public class QueryUser extends Activity implements RecognitionListener{
                             try {
                                 firstactivity.setText((String) sortedActivities.getJSONObject(3).get("activity"));
                                 secondactivity.setText((String) sortedActivities.getJSONObject(4).get("activity"));
-                                thirdactivity.setText((String) sortedActivities.getJSONObject(5).get("activity"));
+                                //thirdactivity.setText((String) sortedActivities.getJSONObject(5).get("activity"));
 
                                 otheractivity.setText(R.string.back);
 
@@ -327,77 +362,28 @@ public class QueryUser extends Activity implements RecognitionListener{
                             }
                         }
                     }
-                });
+                });*/
 
 
-                //setto listener per bottoni.
+            //setto listener per bottoni.
 
-                firstactivity.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+            firstactivity.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //chiamo processFeedback, che creerà l'oggetto JSON da inviare e procederà ad inviarlo (e ad eseguire l'animazione)
+                    processFeedback(FIRST_ACTIVITY);
+                }
+            });
 
-                        //questa variabile è utilizzata per controllare se è stato premuto il tasto "altro", qunidi se sono da
-                        //selezionare le prime 3 attività o le ultime 3.
+            secondactivity.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //chiamo processFeedback, che creerà l'oggetto JSON da inviare e procederà ad inviarlo (e ad eseguire l'animazione)
+                    processFeedback(SECOND_ACTIVITY);
+                }
+            });
 
-                        int index = !otherbuttonPressed ? 0 : 3;
-
-                        //Creo il JSON, e chiamo il servizio WakeUpService per inviarlo al server.
-                        try{
-                            //Prendo l'oggetto JSON dell'attività selezionata
-                            selectedObj = sortedActivities.getJSONObject(index);
-
-                            //Calcolo quanto tempo è passato dall'invio della richiesta all'input dell'utente.
-                            long offset = System.currentTimeMillis()-receivedData.getLong("time");
-
-                            tempObj = new JSONObject("{'requestId'="+receivedData.get("requestId")+", 'offset'="+offset+",'result'='"+selectedObj.get("activity")+"'}");
-
-                            Log.d("Nuovo JSON",tempObj.toString());
-                        }
-                        catch (JSONException e){
-                            Log.e("WakeUpService",e.toString());
-                        }
-
-
-                        //Procedo con l'invio, segnalo la conferma del feedback e chiudo l'activity
-                        wakeService.sendData(tempObj.toString());
-
-                        animate();
-
-                    }
-                });
-
-                secondactivity.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        //questa variabile è utilizzata per controllare se è stato premuto il tasto "altro", qunidi se sono da
-                        //selezionare le prime 3 attività o le ultime 3.
-
-                        int index = !otherbuttonPressed ? 1 : 4;
-
-                        //Creo il JSON, e chiamo il servizio WakeUpService per inviarlo al server.
-                        try{
-                            //Prendo l'oggetto JSON dell'attività selezionata
-                            selectedObj = sortedActivities.getJSONObject(index);
-
-                            //Calcolo quanto tempo è passato dall'invio della richiesta all'input dell'utente.
-                            long offset = System.currentTimeMillis()-receivedData.getLong("time");
-
-                            tempObj = new JSONObject("{'requestId'="+receivedData.get("requestId")+", 'offset'="+offset+",'result'='"+selectedObj.get("activity")+"'}");
-
-                            Log.d("Nuovo JSON",tempObj.toString());
-                        }
-                        catch (JSONException e){
-                            Log.e("WakeUpService",e.toString());
-                        }
-
-                        //Procedo con l'invio, segnalo la conferma del feedback e chiudo l'activity
-                        wakeService.sendData(tempObj.toString());
-
-                        animate();
-                    }
-                });
-
-                thirdactivity.setOnClickListener(new View.OnClickListener() {
+               /* thirdactivity.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         //questa variabile è utilizzata per controllare se è stato premuto il tasto "altro", qunidi se sono da
@@ -428,21 +414,18 @@ public class QueryUser extends Activity implements RecognitionListener{
 
 
                     }
-                });
+                }); NB: NON TOLGO IL CODICE PERCHE' POTREBBE SERVIRE UN TERZO BOTTONE*/
 
 
-
-            }
-            catch(JSONException e){
-                Log.e("onServiceConnected",e.toString());
-            }
-
+        } catch (JSONException e) {
+            Log.e("onServiceConnected", e.toString());
+        }
 
 
     }
 
     @Override
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
 
         //Inserisco nelle sharedpref che l'activity sta andando (mi serve nel wakeup service)
@@ -458,7 +441,7 @@ public class QueryUser extends Activity implements RecognitionListener{
     }
 
     @Override
-    protected void onStop(){
+    protected void onStop() {
         super.onStop();
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -467,27 +450,27 @@ public class QueryUser extends Activity implements RecognitionListener{
         ed.commit();
 
         //Stoppo TTS
-        if (textToSpeech!=null) {
+        if (textToSpeech != null) {
             textToSpeech.stop();
             textToSpeech.shutdown();
         }
 
-        if(wakeupBoundToActivity){
+        if (wakeupBoundToActivity) {
             unbindService(wakeupConnection);
-            wakeupBoundToActivity=false;
+            wakeupBoundToActivity = false;
         }
 
         //Stoppo speechrecognition
         if (recognizer != null) {
             recognizer.destroy();
-            Log.v("QueryUser","Recognizer stoppato");
+            Log.v("QueryUser", "Recognizer stoppato");
         }
     }
 
-    public void animate(){
+    public void animate() {
         //Questo metodo contiene tutte le animazioni che vengono effettuate una volta toccata l'attività corrispondente.
 
-        if(sp.getBoolean("voiceEnabled",true)) {
+        if (sp.getBoolean("voiceEnabled", true)) {
 
             YoYo.with(Techniques.FadeOut)
                     .duration(700)
@@ -510,11 +493,11 @@ public class QueryUser extends Activity implements RecognitionListener{
 
         YoYo.with(Techniques.FadeOut)
                 .duration(700)
-                .playOn(thirdactivity);
+                .playOn(findViewById(R.id.titleDescr));
 
         YoYo.with(Techniques.FadeOut)
                 .duration(700)
-                .playOn(findViewById(R.id.other));
+                .playOn(findViewById(R.id.userinput));
 
         YoYo.with(Techniques.FadeOut)
                 .duration(700)
@@ -522,8 +505,7 @@ public class QueryUser extends Activity implements RecognitionListener{
 
         YoYo.with(Techniques.FadeOut)
                 .duration(700)
-                .playOn(findViewById(R.id.titleDescr));
-
+                .playOn(findViewById(R.id.userinput));
 
 
         //Aspetto la fine dell'animazione, e rimuovo tutto
@@ -534,10 +516,10 @@ public class QueryUser extends Activity implements RecognitionListener{
                 //rimuovo i vari elementi dalla view, per fare posto alla scritta con "feedback ricevuto"
                 firstactivity.setVisibility(View.GONE);
                 secondactivity.setVisibility(View.GONE);
-                thirdactivity.setVisibility(View.GONE);
-                otheractivity.setVisibility(View.GONE);
-                findViewById(R.id.title).setVisibility(View.GONE);
+                //thirdactivity.setVisibility(View.GONE);
                 findViewById(R.id.titleDescr).setVisibility(View.GONE);
+                findViewById(R.id.title).setVisibility(View.GONE);
+                findViewById(R.id.userinput).setVisibility(View.GONE);
                 progress.setVisibility(View.GONE);
 
                 //faccio comparire la scritta di feedback ricevuto
@@ -557,17 +539,46 @@ public class QueryUser extends Activity implements RecognitionListener{
                     public void run() {
                         //faccio passsare un secondo (o poco meno) e termino l'activity
                         finish();
-                        overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
+                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                     }
-                },1200);
+                }, 1200);
 
             }
         }, 700);
 
 
+    }
 
+    public void processFeedback(int activityId) {
+
+        //Questo metodo riceve un intero, che identifica quale attività è stata scelta, tra quella più probabile e quella meno probabile.
+        //Successivamente, ottengo l'oggetto JSON che si riferisce ad una determinata attività, estrapolo l'oggetto, e creo l'oggetto json da inviare
+        //questo oggetto sarà composto da un id della richiesta, da l'offset ("quanto ci mette l'utente a rispondere") e dalla scelta dell'utente.
+
+        //Creo il JSON, e chiamo il servizio WakeUpService per inviarlo al server.
+        try {
+            //Prendo l'oggetto JSON dell'attività selezionata
+            selectedObj = sortedActivities.getJSONObject(activityId);
+
+            //Calcolo quanto tempo è passato dall'invio della richiesta all'input dell'utente.
+            long offset = System.currentTimeMillis() - receivedData.getLong("time");
+
+            tempObj = new JSONObject("{'requestId'=" + receivedData.get("requestId") + ", 'offset'=" + offset + ",'result'='" + selectedObj.get("activity") + "'}");
+
+            Log.d("Nuovo JSON", tempObj.toString());
+        } catch (JSONException e) {
+            Log.e("WakeUpService", e.toString());
+        }
+
+
+        //Procedo con l'invio, segnalo la conferma del feedback e chiudo l'activity
+        wakeService.sendData(tempObj.toString());
+
+        animate();
 
     }
+
+
 
 
 
@@ -578,21 +589,6 @@ public class QueryUser extends Activity implements RecognitionListener{
         recognizer.startListening(recognitionIntent);
     }
 
-    @Override
-    public void onBeginningOfSpeech() {
-        Log.i("QueryUser", "onBeginningOfSpeech");
-
-    }
-
-    @Override
-    public void onBufferReceived(byte[] buffer) {
-        Log.i("QueryUser", "onBufferReceived: " + buffer);
-    }
-
-    @Override
-    public void onEndOfSpeech() {
-        Log.i("QueryUser", "onEndOfSpeech");;
-    }
 
     @Override
     public void onError(int errorCode) {
@@ -611,19 +607,7 @@ public class QueryUser extends Activity implements RecognitionListener{
                 //Controllo se l'app ha il permesso di utilizzare il microfono, altrimenti lo chiedo.
                 //Ciò è indispenabile per il riconoscimento vocale (altrimento non funziona
 
-                //controllo permission
-                if (ContextCompat.checkSelfPermission(QueryUser.this,
-                        Manifest.permission.RECORD_AUDIO)
-                        != PackageManager.PERMISSION_GRANTED) {
-
-                        ActivityCompat.requestPermissions(QueryUser.this,
-                                new String[]{Manifest.permission.RECORD_AUDIO},
-                                0);
-                    recognizer.stopListening();
-                    startRecognition();
-
-                }
-
+               //FAI ALERT DIALOG CHIEDENDO PERMISSIONS
                 message = "Insufficient permissions";
                 break;
 
@@ -632,8 +616,8 @@ public class QueryUser extends Activity implements RecognitionListener{
                 message = "Network error";
                 //esco da queryUser
                 new AlertDialog.Builder(QueryUser.this)
-                        .setTitle("Connessione non riuscita")
-                        .setMessage("Impossibile connettersi al server.\n Riprova in un altro momento.")
+                        .setTitle("Connection not available")
+                        .setMessage("Couldn't connect to the server. Please try later.")
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -659,10 +643,6 @@ public class QueryUser extends Activity implements RecognitionListener{
 
     }
 
-    @Override
-    public void onEvent(int arg0, Bundle arg1) {
-        Log.i("QueryUser", "onEvent");
-    }
 
     @Override
     public void onPartialResults(Bundle arg0) {
@@ -670,9 +650,60 @@ public class QueryUser extends Activity implements RecognitionListener{
         ArrayList<String> matches = arg0
                 .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
 
-        titledescr.setText(titledescr.getText().toString()+matches.get(0));
+        userinput.setText(matches.get(0));
         Log.i("QueryUser","onPartialResults");
         //qui gestisco i risultati.
+    }
+
+
+
+    @Override
+    public void onResults(Bundle results) {
+
+        //In questo metodo gestisco i risultati del riconoscimento vocale.
+        //Prima di tutto, ottengo i risultati e li stampo. successivamente, verifico se nella stringa ottenuta è presente
+        //una delle due parole (NON TUTTE E DUE!). Successivamente chiamerò processFeedback.
+
+        //MANCA gestire il fatto che l'utente potrebbe dire un'altra attività
+        //magari chiedere che attività sta facendo e controllare se è presente nell'array? FAI COME COSA IN PIU' E CHIEDI NEL DOCUMENTO
+
+        //NB: metto il lower case, se no non mi riconosce le stringhe
+
+        //Prendo il primo risultato dell'arraylist (la stringa riconosciuta più probabile)
+        ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+        String result = matches.get(0).toLowerCase();
+        String first = firstactivity.getText().toString().toLowerCase();
+        String second = secondactivity.getText().toString().toLowerCase();
+
+        //CONTROLLA IN QUALCHE MODO GLI ALTRI RISULTATI DELLA RECOGNITION
+
+        userinput.setText(result);
+
+        //Procedo ad inviare i dati e ad animare
+
+        if(result.contains(first) && !result.contains(second)){
+            //Allora è stata detta l'attività del primo bottone: chiamo processfeedback passanto l'activityId 0
+            processFeedback(FIRST_ACTIVITY);
+        }
+        else if(result.contains(second) && !result.contains(first)){
+            //Allora è stata detta l'attività del secondo bottone
+            processFeedback(SECOND_ACTIVITY);
+        }
+        else{
+            Log.d("Speechrecognition","Nessuna delle due");
+            //GESTISCI QUESTA PARTE
+        }
+
+
+
+
+        Log.d("QueryUser",matches.toString());
+        Log.i("QueryUser", "onResults");
+    }
+
+    @Override
+    public void onRmsChanged(float rmsdB) {
+        //Log.i("QueryUser", "onRmsChanged: " + rmsdB);
     }
 
     @Override
@@ -681,19 +712,23 @@ public class QueryUser extends Activity implements RecognitionListener{
     }
 
     @Override
-    public void onResults(Bundle results) {
-        Log.i("QueryUser", "onResults");
-        //qui gestisco i risultati.
-        ArrayList<String> matches = results
-                .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-        Log.d("QueryUser",matches.toString());
-        titledescr.setText(matches.get(0));
+    public void onEvent(int arg0, Bundle arg1) {
+        Log.i("QueryUser", "onEvent");
     }
 
     @Override
-    public void onRmsChanged(float rmsdB) {
-        //Log.i("QueryUser", "onRmsChanged: " + rmsdB);
+    public void onBeginningOfSpeech() {
+        Log.i("QueryUser", "onBeginningOfSpeech");
+    }
 
+    @Override
+    public void onBufferReceived(byte[] buffer) {
+        Log.i("QueryUser", "onBufferReceived: " + buffer);
+    }
+
+    @Override
+    public void onEndOfSpeech() {
+        Log.i("QueryUser", "onEndOfSpeech");;
     }
 
 }

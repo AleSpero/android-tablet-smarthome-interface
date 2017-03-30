@@ -86,6 +86,6 @@ public class WordEntity {
     public static ArrayList<Double> sumValues(WordEntity first, WordEntity second){
         ArrayList<Double> res = new ArrayList<Double>();
 
-
+        return res;
     }
 }

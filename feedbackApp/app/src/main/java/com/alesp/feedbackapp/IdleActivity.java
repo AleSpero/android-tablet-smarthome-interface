@@ -1,5 +1,6 @@
 package com.alesp.feedbackapp;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -10,18 +11,20 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.wang.avi.AVLoadingIndicatorView;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -32,9 +35,6 @@ import java.util.Locale;
 
 public class IdleActivity extends Activity {
 
-
-
-
     //Inizializzo variabili per l'update della UI
     ImageButton startButton;
     ImageButton settings;
@@ -43,8 +43,6 @@ public class IdleActivity extends Activity {
 
     //ArrayList che contiene i dati scaricati
     String data;
-
-    AVLoadingIndicatorView avi;
 
     //Definisco il mio service e il boolean boundtoactivity per indicare se il processo
     // è collegato all'activity
@@ -86,14 +84,13 @@ public class IdleActivity extends Activity {
                                     //Aggiorno icona del bottone
                                     startButton.setImageResource(R.drawable.ic_stop_button_colorato);
                                     serviceStatus.setText(R.string.listening);
-                                    avi.smoothToShow();
-                                    avi.setVisibility(View.VISIBLE);
+
 
                                 } else {
                                     //creo alertdialog e faccio terminare il servizio
                                     new AlertDialog.Builder(IdleActivity.this)
-                                            .setTitle("Connessione non riuscita")
-                                            .setMessage("Impossibile connettersi al server.\n Riprova in un altro momento.")
+                                            .setTitle("Connection not available")
+                                            .setMessage("Couldn't connect to the server. Please try later")
                                             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
@@ -132,11 +129,23 @@ public class IdleActivity extends Activity {
         startButton = (ImageButton) findViewById(R.id.start_service);
         settings = (ImageButton) findViewById(R.id.settings);
         serviceStatus = (TextView) findViewById(R.id.service_running);
-        avi = (AVLoadingIndicatorView) findViewById(R.id.avi);
 
         startButton.setImageResource(R.drawable.ic_play_button_sing_colorato);
         settings.setImageResource(R.drawable.ic_settings);
 
+
+
+        //controllo permission
+        if (ContextCompat.checkSelfPermission(IdleActivity.this,
+                Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(IdleActivity.this,
+                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    0);
+
+        }
+        //se nega il permesso è
 
 
 
@@ -185,29 +194,6 @@ public class IdleActivity extends Activity {
         }
     }
 
-    //Gestisco pressione del bottone, per evitare che involontariamente venga chiusa l'app
-
-    @Override
-    public void onBackPressed(){
-
-        new AlertDialog.Builder(IdleActivity.this)
-                .setTitle("Chiusura app")
-                .setMessage("Sei sicuro di voler uscire dall'app?")
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //chiudo activity
-                        finish();
-                    }
-                })
-                .setNegativeButton(android.R.string.no,new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
-                })
-                .show();
-    } //forse devi toglierlo
 
     private void showNotification(){
         //creo notifica che rimarrà finchè sarà attivo il service
@@ -225,8 +211,8 @@ public class IdleActivity extends Activity {
 
         notificationmanager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notifica  = new Notification.Builder(this)
-                .setContentTitle("Servizio Attivo")
-                .setContentText("Il servizio per il riconoscimento delle attività è attivo.")
+                .setContentTitle("Service Running")
+                .setContentText("The Activity Recognition service is now running.")
                 .setSmallIcon(R.drawable.ic_play_button_sing_colorato)
                 .setOngoing(true)
                 .setContentIntent(pendingIntent)
@@ -248,8 +234,6 @@ public class IdleActivity extends Activity {
         startButton.setImageResource(R.drawable.ic_play_button_sing_colorato);
         //aggiorno scritta in alto
         serviceStatus.setText(R.string.notActive);
-        avi.smoothToHide();
-        avi.setVisibility(View.INVISIBLE);
 
         //tolgo notification
         notificationmanager.cancel(NOTIFICATION_SERVICE_RUNNING_ID);

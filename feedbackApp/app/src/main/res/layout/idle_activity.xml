@@ -31,26 +31,18 @@
             android:orientation="horizontal">
 
         <TextView
-            android:text="Servizio non attivo"
+            android:text="@string/notActive"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:textAlignment="center"
             android:id="@+id/service_running" />
 
-            <com.wang.avi.AVLoadingIndicatorView
-                android:id="@+id/avi"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                app:indicatorName="BallPulseIndicator"
-                app:indicatorColor="#424242"
-                android:visibility="invisible"
 
-                />
             </LinearLayout>
 
         <LinearLayout
-            android:layout_marginTop="110dp"
+            android:layout_marginTop="90dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"

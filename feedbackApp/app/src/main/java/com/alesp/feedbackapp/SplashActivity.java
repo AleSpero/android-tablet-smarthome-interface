@@ -14,7 +14,6 @@ public class SplashActivity extends Activity {
     //Definisco variabili
     TextView title;
     TextView connection;
-    AVLoadingIndicatorView avi;
     static int SPLASH_TIME_OUT = 1000;
 
     @Override
@@ -25,7 +24,6 @@ public class SplashActivity extends Activity {
         //Collego cose
         title = (TextView) findViewById(R.id.title);
         connection = (TextView) findViewById(R.id.connection);
-        avi = (AVLoadingIndicatorView) findViewById(R.id.avi);
 
         new Handler().postDelayed(new Runnable() {
 

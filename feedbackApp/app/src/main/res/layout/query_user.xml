@@ -36,14 +36,34 @@
             android:layout_height="60dp"
             android:layout_gravity="center_horizontal">
 
-        <com.github.zagum.speechrecognitionview.RecognitionProgressView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:id="@+id/progress"
-            android:visibility="gone"/>
+            <com.github.zagum.speechrecognitionview.RecognitionProgressView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:id="@+id/progress"
+                android:visibility="gone"/>
+
+
 
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/userinput"
+                android:textSize="20sp"
+                android:textAlignment="center"
+                android:gravity="center_horizontal"/>
+
+
+
+        </LinearLayout>
+
 
         <TextView
             android:text="@string/feedbackReceived"
@@ -53,12 +73,14 @@
             android:id="@+id/feedbackReceived"
             android:textSize="70sp"
             android:textAlignment="center"
-            android:layout_marginTop="150dp"
+            android:layout_marginTop="130dp"
             android:textColor="?android:attr/textColorTertiary"
             android:visibility="gone"/>
 
+
+
         <LinearLayout
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -89,12 +111,11 @@ style="@style/CustomButton"
                 android:layout_width="260dp"
                 android:layout_height="260dp"
                 android:background="@drawable/buttonshape"
-                android:layout_marginRight="50dp"
                 android:textColor="?android:attr/textColorTertiary" />
 
             <Button
                 android:id="@+id/third_activity"
-
+                android:visibility="gone"
                 android:text="Button"
                 android:textSize="25sp"
                 style="@style/CustomButton"
@@ -106,7 +127,10 @@ style="@style/CustomButton"
 
         </LinearLayout>
 
-        <Button
+
+
+      <!--  <Button
+            android:visibility="gone"
             android:layout_gravity="center_horizontal"
             android:layout_width="880dp"
             android:layout_height="wrap_content"
@@ -117,7 +141,7 @@ style="@style/CustomButton"
             android:text="Altro"
             android:textColor="?android:attr/textColorTertiary"
             android:fontFamily="sans-serif-medium"
-            android:id="@+id/other" />
+            android:id="@+id/other" />-->
 
     </LinearLayout>
 
