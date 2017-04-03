@@ -2,11 +2,25 @@
 <resources>
     <color name="colorPrimary">#FAFAFA</color>
     <color name="colorPrimaryDark">#FAFAFA</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccent">#2196F3</color>
     <color name="color1">#3164d7</color>
     <color name="color2">#d92d29</color>
     <color name="color3">#eeaa10</color>
     <color name="color4">#3164d7</color>
     <color name="color5">#2e9641</color>
+
+    <!-- OVERWRITE THESE COLORS FOR A LIGHT THEME -->
+    <!-- MaterialDrawer DEFAULT colors -->
+    <color name="material_drawer_background">#F9F9F9</color>
+    <!-- Material DEFAULT text / items colors -->
+    <color name="material_drawer_primary_text">#DE000000</color>
+    <color name="material_drawer_primary_icon">#8A000000</color>
+    <color name="material_drawer_secondary_text">#8A000000</color>
+    <color name="material_drawer_hint_text">#42000000</color>
+    <color name="material_drawer_divider">#1F000000</color>
+    <!-- Material DEFAULT drawer colors -->
+    <color name="material_drawer_selected">#E8E8E8</color>
+    <color name="material_drawer_selected_text">#2196F3</color>
+    <color name="material_drawer_header_selection_text">#FFF</color>
 </resources>
 

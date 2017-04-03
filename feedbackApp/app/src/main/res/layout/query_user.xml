@@ -33,7 +33,7 @@
         <LinearLayout
             android:layout_marginTop="20dp"
             android:layout_width="wrap_content"
-            android:layout_height="60dp"
+            android:layout_height="81dp"
             android:layout_gravity="center_horizontal">
 
             <com.github.zagum.speechrecognitionview.RecognitionProgressView
@@ -73,7 +73,7 @@
             android:id="@+id/feedbackReceived"
             android:textSize="70sp"
             android:textAlignment="center"
-            android:layout_marginTop="130dp"
+            android:layout_marginTop="110dp"
             android:textColor="?android:attr/textColorTertiary"
             android:visibility="gone"/>
 

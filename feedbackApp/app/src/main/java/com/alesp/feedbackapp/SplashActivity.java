@@ -30,7 +30,7 @@ public class SplashActivity extends Activity {
             @Override
             public void run() {
 
-                startActivity(new Intent(SplashActivity.this,IdleActivity.class));
+                startActivity(new Intent(SplashActivity.this,HomeActivity.class));
                 overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
                 finish();
 

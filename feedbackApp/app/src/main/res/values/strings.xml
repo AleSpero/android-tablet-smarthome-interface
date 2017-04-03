@@ -13,6 +13,9 @@
     <string name="retry">Didn\'t understand. Please try again</string>
     <string name="voicerecognition">Voice Recognition</string>
     <string name="about">About This App</string>
+    <string name="insuffpermtitle">Insufficient Permissions</string>
+    <string name="insuffpermdescr">This app needs microphone permission to work properly.\n Please enable permissions or disable the voice recognition.</string>
+    <string name="mistake">Did i make a mistake?</string>
 
 
 </resources>

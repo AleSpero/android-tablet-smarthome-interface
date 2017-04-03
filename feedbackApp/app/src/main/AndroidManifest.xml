@@ -37,8 +37,13 @@
         <activity android:name=".IdleActivity"
             android:launchMode="singleTop"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:screenOrientation="landscape"
+        android:screenOrientation="landscape"
             ></activity>
+
+        <activity android:name=".HomeActivity"
+            android:launchMode="singleTop"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:screenOrientation="landscape"></activity>
 
     </application>
 

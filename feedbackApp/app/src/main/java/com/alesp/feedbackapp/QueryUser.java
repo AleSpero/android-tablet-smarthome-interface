@@ -79,7 +79,147 @@ public class QueryUser extends Activity implements RecognitionListener {
 
     //definisco variabile per il riconoscimento vocale
     SpeechRecognizer recognizer;
+    SpeechRecognizer yesornorecognizer;
     Intent recognitionIntent;
+    RecognitionListener yesornolistener = new RecognitionListener() {
+        @Override
+        public void onReadyForSpeech(Bundle params) {
+
+        }
+
+        @Override
+        public void onBeginningOfSpeech() {
+
+        }
+
+        @Override
+        public void onRmsChanged(float rmsdB) {
+
+        }
+
+        @Override
+        public void onBufferReceived(byte[] buffer) {
+
+        }
+
+        @Override
+        public void onEndOfSpeech() {
+
+        }
+
+        @Override
+        public void onError(int errorCode) {
+            String message = "No Input";
+
+            //controllo i vari codici di errore ed agisco di conseguenza
+            switch (errorCode) {
+                case SpeechRecognizer.ERROR_AUDIO:
+                    message = "Audio recording error";
+                    break;
+                case SpeechRecognizer.ERROR_CLIENT:
+                    message = "Client side error";
+                    break;
+                case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
+                    //Se non ho la permission, la chiedo all'utente
+                    //Controllo se l'app ha il permesso di utilizzare il microfono, altrimenti lo chiedo.
+                    //Ciò è indispenabile per il riconoscimento vocale (altrimento non funziona
+
+                    new AlertDialog.Builder(QueryUser.this)
+                            .setTitle(getString(R.string.insuffpermtitle))
+                            .setMessage(getString(R.string.insuffpermdescr))
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    finish();
+                                }
+                            })
+                            .show();
+
+                    //FAI ALERT DIALOG CHIEDENDO PERMISSIONS
+                    message = "Insufficient permissions";
+                    break;
+
+                case SpeechRecognizer.ERROR_NETWORK:
+                case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
+                    message = "Network error";
+                    //esco da queryUser
+                    new AlertDialog.Builder(QueryUser.this)
+                            .setTitle("Connection not available")
+                            .setMessage("Couldn't connect to the server. Please try later.")
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    finish();
+                                }
+                            })
+                            .show();
+                    break;
+                case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
+                    message = "RecognitionService busy";
+                    break;
+                case SpeechRecognizer.ERROR_SERVER:
+                    message = "error from server";
+                    break;
+                default:
+                    textToSpeech.speak(getString(R.string.retry),TextToSpeech.QUEUE_ADD,null,"RETRY");
+                    progress.stop();
+                    progress.play();
+                    break;
+            }
+            Log.e("QueryUser", "FAILED " + message);
+        }
+
+        @Override
+        public void onResults(Bundle results) {
+            //qui gestisco i risultati.
+            ArrayList<String> matches = results
+                    .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+            String result = matches.get(0);
+
+            userinput.setText(result);
+            Log.i("QueryUser","onResults");
+            //qui gestisco i risultati.
+
+            if(result.contains("yes")){
+                textToSpeech.speak("Ok",TextToSpeech.QUEUE_ADD,null,null);
+                yesornorecognizer.destroy();
+                finish();
+            }
+            else if(result.contains("no")){
+                progress.stop();
+                progress.setSpeechRecognizer(recognizer);
+                progress.setRecognitionListener(QueryUser.this);
+                progress.play();
+                yesornorecognizer.stopListening();
+                yesornorecognizer.destroy();
+                textToSpeech.speak(getString(R.string.whichActivity), TextToSpeech.QUEUE_FLUSH, null, "WHICH_ACTIVITY");
+
+            }
+            else{
+
+            }
+
+
+
+        }
+
+
+        @Override
+        public void onPartialResults(Bundle partialResults) {
+            //qui gestisco i risultati.
+            ArrayList<String> matches = partialResults
+                    .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+
+            userinput.setText(matches.get(0));
+            Log.i("QueryUser","onPartialResults");
+            //qui gestisco i risultati.
+        }
+
+        @Override
+        public void onEvent(int eventType, Bundle params) {
+
+        }
+    };
 
     //Questa variabile serve per tenere traccia del bottone other cliccato. se esso è stato cliccato, vuole dire che si stanno
     //guardando le attività 4-5-6 e quindi bisognerà riferirsi a quegli indici. altrimenti le attività interessate saranno la 1-2-3.
@@ -153,6 +293,11 @@ public class QueryUser extends Activity implements RecognitionListener {
             progress.setRecognitionListener(this);
 
             progress.setVisibility(View.VISIBLE);
+
+            //Inizializzo speech recognizer per il yes or no
+            yesornorecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+            yesornorecognizer.setRecognitionListener(yesornolistener);
+
 
 
         }
@@ -247,6 +392,35 @@ public class QueryUser extends Activity implements RecognitionListener {
 
                                     break;
 
+                                case "MISTAKE":
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            //fermo progressbar e recognizer, faccio partire yesornorecognizer
+                                            userinput.setText("");
+                                            recognizer.stopListening();
+                                            recognizer.destroy();
+                                            progress.stop();
+                                            progress.setSpeechRecognizer(yesornorecognizer);
+                                            progress.setRecognitionListener(yesornolistener);
+                                            progress.play();
+                                            progress.postDelayed(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    yesornorecognizer.startListening(recognitionIntent);
+                                                }
+                                            }, 50);
+                                        }
+                                    });
+
+
+                                    break;
+
+                                case "FEEDBACKRECEIVED":
+                                    //faccio passsare un secondo (o poco meno) e termino l'activity
+                                    finish();
+                                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                                break;
                             }
                         }
 
@@ -533,17 +707,21 @@ public class QueryUser extends Activity implements RecognitionListener {
                 Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
                 r.play(); TROVA MODO DI CAMBIARE SUONERIA*/
 
-
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        //faccio passsare un secondo (o poco meno) e termino l'activity
-                        finish();
-                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                if(sp.getBoolean("voiceEnabled",true)) {
+                    textToSpeech.speak(getString(R.string.feedbackReceived), TextToSpeech.QUEUE_ADD, null, "FEEDBACKRECEIVED");
+                }
+                else{
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            //faccio passsare un secondo (o poco meno) e termino l'activity
+                            finish();
+                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                        }
+                    },1200);
+                }
                     }
-                }, 1200);
 
-            }
         }, 700);
 
 
@@ -587,6 +765,7 @@ public class QueryUser extends Activity implements RecognitionListener {
     //in questo metodo faccio partire il listening, imposto l'icona e faccio partire il suono
     public void startRecognition(){
         recognizer.startListening(recognitionIntent);
+        userinput.setText("");
     }
 
 
@@ -606,6 +785,17 @@ public class QueryUser extends Activity implements RecognitionListener {
                 //Se non ho la permission, la chiedo all'utente
                 //Controllo se l'app ha il permesso di utilizzare il microfono, altrimenti lo chiedo.
                 //Ciò è indispenabile per il riconoscimento vocale (altrimento non funziona
+
+                new AlertDialog.Builder(QueryUser.this)
+                        .setTitle(getString(R.string.insuffpermtitle))
+                        .setMessage(getString(R.string.insuffpermdescr))
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                            }
+                        })
+                        .show();
 
                //FAI ALERT DIALOG CHIEDENDO PERMISSIONS
                 message = "Insufficient permissions";
@@ -633,7 +823,6 @@ public class QueryUser extends Activity implements RecognitionListener {
                 message = "error from server";
                 break;
             default:
-                //Dico all'utente che il tablet "non ha capito" e riprovo
                 textToSpeech.speak(getString(R.string.retry),TextToSpeech.QUEUE_ADD,null,"RETRY");
                 progress.stop();
                 progress.play();
@@ -671,28 +860,53 @@ public class QueryUser extends Activity implements RecognitionListener {
 
         //Prendo il primo risultato dell'arraylist (la stringa riconosciuta più probabile)
         ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-        String result = matches.get(0).toLowerCase();
+        String result;
+        boolean found = false;
+        int i=0;
+
+
         String first = firstactivity.getText().toString().toLowerCase();
         String second = secondactivity.getText().toString().toLowerCase();
 
-        //CONTROLLA IN QUALCHE MODO GLI ALTRI RISULTATI DELLA RECOGNITION
 
-        userinput.setText(result);
+        do{
+            result = matches.get(i).toLowerCase();
 
-        //Procedo ad inviare i dati e ad animare
+            if(result.contains(first) && !result.contains(second)){
+                //Allora è stata detta l'attività del primo bottone: chiamo processfeedback passanto l'activityId 0
+                found = true;
+                userinput.setText(result);
+                processFeedback(FIRST_ACTIVITY);
+            }
+            else if(result.contains(second) && !result.contains(first)){
+                //Allora è stata detta l'attività del secondo bottone
+                found = true;
+                userinput.setText(result);
+                processFeedback(SECOND_ACTIVITY);
+            }
 
-        if(result.contains(first) && !result.contains(second)){
-            //Allora è stata detta l'attività del primo bottone: chiamo processfeedback passanto l'activityId 0
-            processFeedback(FIRST_ACTIVITY);
+            i++;
+        }while(!found && i<matches.size());
+
+
+
+       //Ora, gestisco se l'utente non ha detto nessuna delle due attività:
+        //chiederò inizialmente all'utente se ho sbagliato, e in caso di risposta affermativa, chiudo
+        //NB: qui ci sarebbe da fare quella cosa opzionale di chiedere che attività sta facendo per controllare l'array
+        if(!found){
+
+            Log.d("QueryUser","Nessuna delle due");
+
+
+            //Chiedo all'utente se ho sbagliato
+            textToSpeech.speak(getString(R.string.mistake),TextToSpeech.QUEUE_ADD,null,"MISTAKE");
+
+
+
+
+
         }
-        else if(result.contains(second) && !result.contains(first)){
-            //Allora è stata detta l'attività del secondo bottone
-            processFeedback(SECOND_ACTIVITY);
-        }
-        else{
-            Log.d("Speechrecognition","Nessuna delle due");
-            //GESTISCI QUESTA PARTE
-        }
+
 
 
 
