@@ -15,6 +15,7 @@ public class CrossfadeWrapper implements ICrossfader {
     private Drawer myDrawer;
     private PrimaryDrawerItem dummy;
     private int position = -1;
+    private boolean isComplete = false;
 
     public CrossfadeWrapper(Crossfader crossfader) {
         this.mCrossfader = crossfader;
@@ -23,11 +24,23 @@ public class CrossfadeWrapper implements ICrossfader {
         this.mCrossfader=crossfader;
         this.dummy=dummy;
         this.myDrawer=myDrawer;
+        isComplete = true;
 
     }
 
     @Override
     public void crossfade() {
+        if(isComplete){
+            position = position == -1 ?  (int) dummy.getIdentifier() : position;
+
+            if(!mCrossfader.isCrossFaded()){
+                myDrawer.removeItemByPosition(position);
+            }
+            else{
+                myDrawer.addItemAtPosition(new PrimaryDrawerItem().withIcon(GoogleMaterial.Icon.gmd_settings),position);
+            }
+
+        }
         mCrossfader.crossFade();
     }
 

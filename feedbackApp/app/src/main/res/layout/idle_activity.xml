@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/homeContainer">
 
 
 
@@ -31,10 +32,11 @@
             android:orientation="horizontal">
 
         <TextView
+            android:layout_marginTop="10dp"
             android:text="@string/notActive"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
+            android:textSize="25sp"
             android:textAlignment="center"
             android:id="@+id/service_running" />
 
@@ -42,7 +44,7 @@
             </LinearLayout>
 
         <LinearLayout
-            android:layout_marginTop="90dp"
+            android:layout_marginTop="50dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -58,27 +60,10 @@
                 android:layout_width="260dp"
                 android:layout_height="260dp"
                 android:background="@drawable/buttonshape"
-                android:layout_marginRight="50dp"
                 app:srcCompat="@drawable/ic_play_button_sing"
                 android:adjustViewBounds="true"
                 android:padding="70dp"
                 android:scaleType="fitCenter"/>
-
-            <ImageButton
-                android:id="@+id/settings"
-
-                android:text="Button"
-                android:textSize="30sp"
-                style="@style/CustomButton"
-                android:layout_width="260dp"
-                android:layout_height="260dp"
-                android:background="@drawable/buttonshape"
-                app:srcCompat="@drawable/ic_settings"
-                android:adjustViewBounds="true"
-                android:padding="50dp"
-                android:scaleType="fitCenter"
-
-                android:textColor="?android:attr/textColorTertiary" />
 
         </LinearLayout>
 

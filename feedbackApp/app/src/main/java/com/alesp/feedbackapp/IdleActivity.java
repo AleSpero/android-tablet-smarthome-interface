@@ -20,11 +20,25 @@ import android.speech.tts.TextToSpeech;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+
+import com.mikepenz.crossfader.Crossfader;
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.ExpandableDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.SecondarySwitchDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.Nameable;
+import com.mikepenz.materialize.util.UIUtils;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -37,8 +51,10 @@ public class IdleActivity extends Activity {
 
     //Inizializzo variabili per l'update della UI
     ImageButton startButton;
-    ImageButton settings;
-    TextView serviceStatus;
+
+    //CReo drawer (che conterrà la freccettina per tornare indietro)
+    Drawer result;
+    Crossfader crossFader;
 
 
     //ArrayList che contiene i dati scaricati
@@ -79,14 +95,7 @@ public class IdleActivity extends Activity {
                             public void run() {
 
 
-                                if (wakeService.isConnected()) {
-
-                                    //Aggiorno icona del bottone
-                                    startButton.setImageResource(R.drawable.ic_stop_button_colorato);
-                                    serviceStatus.setText(R.string.listening);
-
-
-                                } else {
+                                if(!wakeService.isConnected()) {
                                     //creo alertdialog e faccio terminare il servizio
                                     new AlertDialog.Builder(IdleActivity.this)
                                             .setTitle("Connection not available")
@@ -125,15 +134,7 @@ public class IdleActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.idle_activity);
 
-        //Faccio collegamenti
-        startButton = (ImageButton) findViewById(R.id.start_service);
-        settings = (ImageButton) findViewById(R.id.settings);
-        serviceStatus = (TextView) findViewById(R.id.service_running);
-
-        startButton.setImageResource(R.drawable.ic_play_button_sing_colorato);
-        settings.setImageResource(R.drawable.ic_settings);
-
-
+        //getActionBar().setDisplayHomeAsUpEnabled(true);
 
         //controllo permission
         if (ContextCompat.checkSelfPermission(IdleActivity.this,
@@ -145,40 +146,43 @@ public class IdleActivity extends Activity {
                     0);
 
         }
-        //se nega il permesso è
 
+        //Faccio partire il service
+        Intent servIntent = new Intent(IdleActivity.this, WakeUpService.class);
+        bindService(servIntent,wakeupConnection, Context.BIND_AUTO_CREATE);
+        wakeupBoundToActivity = true;
 
+        //CREAZIONE DRAWER
+        result = new DrawerBuilder()
+                .withActivity(this)
+                .addDrawerItems(
+                        //aggiungo tasto back
 
-        //Setto listener per far partire/fermare il servizio
-        startButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                        new PrimaryDrawerItem().withDescription("Starts the activity recognition service")
+                                .withName("Activity Recognition").withIcon(GoogleMaterial.Icon.gmd_arrow_back).withIdentifier(0)
+                       )
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                        if (drawerItem instanceof Nameable) {
+                            // Toast.makeText(MiniDrawerActivity.this, ((Nameable) drawerItem).getName().getText(MiniDrawerActivity.this), Toast.LENGTH_SHORT).show();
+                        }
+                        return false;
+                    }
+                })
+                .withSelectedItem(-1)
+                .withGenerateMiniDrawer(true).build();
+            //FAI PARTIRE VOCE SERVICE STARTED O METTI QUALCHE ICONCINA
+        //Creo minidrawer
+        int secondWidth = (int) UIUtils.convertDpToPixel(72, this);
 
-                if(!(wakeupBoundToActivity)){
-                    //Faccio partire il service
-                    Intent servIntent = new Intent(IdleActivity.this, WakeUpService.class);
-                    bindService(servIntent,wakeupConnection, Context.BIND_AUTO_CREATE);
-                    wakeupBoundToActivity = true;
-                }
-                else{
-                   disconnectService();
-                }
-
-
-            }
-        });
-
-        //Setto listener per il tasto impostazioni
-        settings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                //Faccio partire settingsActivity
-                startActivity(new Intent(IdleActivity.this,SettingsActivity.class));
-                //overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
-
-            }
-        });
+        crossFader = new Crossfader()
+                .withContent(findViewById(R.id.homeContainer))
+                .withFirst(result.getMiniDrawer().build(this), secondWidth)
+                .withSecond(result.getMiniDrawer().build(this), secondWidth)
+                .withSavedInstance(savedInstanceState)
+                .build();
+        result.getMiniDrawer().withCrossFader(new CrossfadeWrapper(crossFader));
 
 
 
@@ -229,11 +233,6 @@ public class IdleActivity extends Activity {
             wakeService.stopService(new Intent(IdleActivity.this,WakeUpService.class));
         }
 
-        //Aggiorno icona del bottone
-        //NB: per qualche motivo oscuro, se faccio questo nel callback del servizio disconnesso, non funziona
-        startButton.setImageResource(R.drawable.ic_play_button_sing_colorato);
-        //aggiorno scritta in alto
-        serviceStatus.setText(R.string.notActive);
 
         //tolgo notification
         notificationmanager.cancel(NOTIFICATION_SERVICE_RUNNING_ID);

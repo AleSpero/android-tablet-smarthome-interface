@@ -20,8 +20,8 @@
 
     <!-- Definition for the primary item -->
     <dimen name="material_drawer_item_primary">99dp</dimen>
-    <dimen name="material_drawer_item_primary_icon">56dp</dimen>
-    <dimen name="material_drawer_item_primary_icon_padding">16dp</dimen>
+    <dimen name="material_drawer_item_primary_icon">62dp</dimen>
+    <dimen name="material_drawer_item_primary_icon_padding">8dp</dimen>
     <dimen name="material_drawer_item_primary_icon_padding_right">32dp</dimen>
     <dimen name="material_drawer_item_primary_text">18sp</dimen>
     <dimen name="material_drawer_item_primary_description">12sp</dimen>

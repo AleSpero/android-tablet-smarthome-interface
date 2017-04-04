@@ -2,9 +2,9 @@
 <resources>
     <string name="app_name">feedbackApp</string>
     <string name="whichActivity">Which activity are you doing?</string>
-    <string name="controlPanel">Control Panel</string>
+    <string name="controlPanel">Activity Recognition</string>
     <string name="listening">Listening...</string>
-    <string name="notActive">Service not running</string>
+    <string name="notActive">Currently you are:</string>
     <string name="whichDescription">Touch one of the icons or speak</string>
     <string name="settings">Settings</string>
     <string name="back">Back</string>

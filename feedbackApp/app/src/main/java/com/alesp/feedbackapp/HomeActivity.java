@@ -6,9 +6,11 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Toast;
@@ -53,8 +55,11 @@ public class HomeActivity extends Activity {
     final static int CONTROL_PANEL = 0;
     final static int ACTIVITY_RECOGNITION = 2;
     final static int SENSOR_DATA = 3;
-    final static int SETTINGS = 4;
-    final static int ABOUT = 6;
+    final static int SETTINGS_DUMMY = 5;
+    final static int SETTINGS = 6;
+    final static int ABOUT = 7;
+
+
 
     boolean isExpanded = false;
 
@@ -63,13 +68,23 @@ public class HomeActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_activity);
 
-
+        //creo dummy
+        final PrimaryDrawerItem dummy = new PrimaryDrawerItem()
+                .withIcon(GoogleMaterial.Icon.gmd_settings)
+                .withIdentifier(5)
+                .withName("remove");
 
         //memorizzo un draweritem in una variable poichè poi devo cambiare l'icona (control panel)
         final PrimaryDrawerItem controlpanel = new PrimaryDrawerItem().withName("Control Panel")
                 .withIcon(GoogleMaterial.Icon.gmd_menu)
                 .withIdentifier(CONTROL_PANEL)
                 .withSelectable(true);
+
+        final PrimaryDrawerItem about = new PrimaryDrawerItem()
+                .withName(getString(R.string.about))
+                .withIcon(GoogleMaterial.Icon.gmd_info)
+                .withIdentifier(ABOUT)
+                .withSelectable(false);
 
         //CREAZIONE DRAWER
         result = new DrawerBuilder()
@@ -89,8 +104,8 @@ public class HomeActivity extends Activity {
                         //Setto dummy per i settings (che rimuovo in automatico durante il crossfade
 
                         //NB: MAGARI UTILIZZA SETVISIBILITY SUL PRIMARYDRAWERITEM?
-                        new PrimaryDrawerItem().withIcon(GoogleMaterial.Icon.gmd_settings).withIdentifier(5),
-                        new PrimaryDrawerItem().withName(getString(R.string.about)).withIcon(GoogleMaterial.Icon.gmd_info).withIdentifier(ABOUT).withSelectable(false))
+                        dummy,
+                        about)
                         .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
@@ -105,13 +120,13 @@ public class HomeActivity extends Activity {
                                 if(!isExpanded){
                                     //Apro drawer completo
                                     Log.d("HomeActivity","espando");
-                                    crossfaderWrapper.crossfade(result,(PrimaryDrawerItem) result.getDrawerItem(5));
+                                    crossfaderWrapper.crossfade();
                                     isExpanded = true;
                                     controlpanel.withIcon(GoogleMaterial.Icon.gmd_arrow_back);
                                 }
                                 else{
                                     //chiudo drawer
-                                    crossfaderWrapper.crossfade(result,(PrimaryDrawerItem) result.getDrawerItem(5));
+                                    crossfaderWrapper.crossfade();
                                     Log.d("HomeActivity","riduco");
                                     isExpanded = false;
                                     controlpanel.withIcon(GoogleMaterial.Icon.gmd_menu);
@@ -124,6 +139,7 @@ public class HomeActivity extends Activity {
                                 //Faccio partire il service
                                 //Differenza tra mini e complete in termini di azioni?
                                 Log.d("HomeActivity","activityrec");
+                                startActivity(new Intent(HomeActivity.this,IdleActivity.class));
                                 result.setSelection(-1);
                                 break;
 
@@ -134,10 +150,16 @@ public class HomeActivity extends Activity {
                                 break;
 
                             case SETTINGS:
-                                //Activity settings
+                                //Apro drawer completo e apro expandable
                                 Log.d("HomeActivity","settings");
-                                result.setSelection(-1);
+                                crossFader.crossFade();
+                               // result.setSelectionAtPosition(4);
                                 //startActivity(new Intent(HomeActivity.this,SettingsActivity.class));
+                                break;
+
+                            case SETTINGS_DUMMY:
+                                Log.d("HomeActivity","settingsDummy");
+                                crossFader.crossFade();
                                 break;
 
                             case ABOUT:
@@ -155,6 +177,12 @@ public class HomeActivity extends Activity {
                 .withGenerateMiniDrawer(true)
                 .buildView();
 
+        //Rimuovo animazione chiamando il recyclerview del drawer
+        result.getRecyclerView().getItemAnimator().setChangeDuration(0);
+        result.getRecyclerView().getItemAnimator().setMoveDuration(0);
+        result.getRecyclerView().getItemAnimator().setAddDuration(0);
+        result.getRecyclerView().getItemAnimator().setRemoveDuration(0);
+
         //the MiniDrawer is managed by the Drawer and we just get it to hook it into the Crossfader
         miniResult = result.getMiniDrawer();
 
@@ -171,6 +199,43 @@ public class HomeActivity extends Activity {
                 .withSavedInstance(savedInstanceState)
                 .build();
 
+        //definisco listener custom per il mio crossfader, in modo da gestire la rimozione dell'elemento
+        crossFader.withPanelSlideListener(new SlidingPaneLayout.PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+
+                if(slideOffset!=0){
+                    //If per prevenire che vengano cancellati altri elementi
+                    if(result.getDrawerItems().size()==7) {
+                        about.withIcon(R.drawable.noicon);
+                        about.withName("");
+
+
+                        //Tolgo il dummy
+                        result.removeItemByPosition(5);
+
+                        //rimetto tutto
+                        about.withIcon(GoogleMaterial.Icon.gmd_info);
+                        about.withName(R.string.about);
+                    }
+
+                }
+
+            }
+
+            @Override
+            public void onPanelOpened(View panel) {
+
+            }
+
+            @Override
+            public void onPanelClosed(View panel) {
+                Log.d("lolol",result.getDrawerItems().size()+"");
+                if(result.getDrawerItems().size()!=7)
+                result.addItemAtPosition(dummy,5);
+            }
+        });
+
 //imposto il wrapper custom
         crossfaderWrapper= new CrossfadeWrapper(crossFader);
 
@@ -179,6 +244,18 @@ public class HomeActivity extends Activity {
 
         //Definisco divider
         crossFader.getCrossFadeSlidingPaneLayout().setShadowResourceLeft(R.drawable.divider);
+
+
+    }
+
+    @Override
+    public void onBackPressed(){
+        if(crossFader.isCrossFaded()){
+            crossFader.crossFade();
+        }
+        else {
+            super.onBackPressed();
+        }
     }
 
     private OnCheckedChangeListener onCheckedChangeListener = new OnCheckedChangeListener() {
