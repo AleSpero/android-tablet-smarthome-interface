@@ -437,28 +437,11 @@ public class QueryUser extends Activity implements RecognitionListener {
         //Prendo il dato ricevuto dal service e lo trasformo in un oggetto JSON
         try {
             datafromService = getIntent().getExtras();
-            // probActivities = new JSONArray(datafromService.getString("Data")).getJSONArray(1);
             receivedData = new JSONObject(datafromService.getString("Data"));
-            probActivities = (JSONArray) receivedData.get("data");
-            maxObj = new JSONObject("{'activity':'lol','probability':0.0}");
 
-            //Costruisco un nuovo JSONArray con le attività ordinate in modo descrescente per la probabilità
-            while (probActivities.length() != 0) {
-
-                for (int i = 0; i < probActivities.length(); i++) {
-                    if (probActivities.getJSONObject(i).getDouble("probability") > maxObj.getDouble("probability")) {
-                        maxObj = probActivities.getJSONObject(i);
-                        maxIndex = i;
-                    }
-                }
-
-                //Calcolo il max dell'array, e una volta inserito nel nuovo array, lo cancello dal vecchio
-                sortedActivities.put(maxObj);
-                maxObj = new JSONObject("{'activity':'lol','probability':0.0}");
-                probActivities.remove(maxIndex);
-
-            }
-
+            //Chiamo il metodo sortactivities, che prende in input l'oggetto json ricevuto e restituisce un
+            //Array JSON ordinato
+            sortedActivities = ActivityRecognition.sortActivities(receivedData);
 
             //Aggiorno i bottoni con le attività più probabili
             firstactivity.setText((String) sortedActivities.getJSONObject(0).get("activity"));

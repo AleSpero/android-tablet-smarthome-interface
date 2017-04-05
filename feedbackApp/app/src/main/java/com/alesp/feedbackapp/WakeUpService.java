@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -39,13 +40,15 @@ public class WakeUpService extends Service {
 
     private final IBinder binder = new WakeUpBinder();
 
-    //creo variabile per text to speech
-    TextToSpeech textToSpeech;
-    //FORSE TOGLI
+    //Definisco variabile che gestisce il broadcaster (inviare messaggi alle activity)
+    LocalBroadcastManager broadcast;
 
     @Override
     public void onCreate(){
         super.onCreate();
+
+        //Inizializzo broadcaster
+        broadcast = LocalBroadcastManager.getInstance(this);
 
         //Eseguo connessione
         connect();
@@ -95,6 +98,21 @@ public class WakeUpService extends Service {
 
     }
 
+    //Definisco metodo per inviare dati ad Activity Recognition
+   private void sendToActivity(String message){
+       //In questo metodo "avviso" l'app che è arrivato un nuovo dato dal raspberry.
+
+       Intent intent = new Intent("NOTIFY_ACTIVITY");
+
+       if(message != null){
+           intent.putExtra("CURRENT_ACTIVITY",message);
+       }
+
+       //invio messaggio tramite broadcaster
+       broadcast.sendBroadcast(intent);
+
+   }
+
     public boolean connect(){
 
         if(!connected) {
@@ -107,29 +125,61 @@ public class WakeUpService extends Service {
                 @Override
                 public void onMessage(String message) {
                     Log.v("WakeUpService", "Ricevuto: " + message);
+                    String type;
+                    JSONObject currentActivity;
 
-                    //Se l'activity queryUser non è attiva, sveglio subito l'activity:
-                    //altrimenti aspetto (?)
 
-                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-                    //Se l'activity QueryUser non è attiva, falla partire
-                    if (!prefs.getBoolean("active", false)) {
-                        //faccio partire activity QueryUser
-                        Intent intent = new Intent("android.intent.category.LAUNCHER");
+                    //Controllo il tipo di richiesta
+                    try{
+                        type = new JSONObject(message).getString("requestType");
+                        Log.d("Type",type);
 
-                        //Aggiungo all'intent, per ogni iterazione, ogni elemento del JSONarray
-                        intent.putExtra("Data", message);
+                    switch (type){
 
-                        intent.setClassName("com.alesp.feedbackapp", "com.alesp.feedbackapp.QueryUser");
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
+                        case "query":
+                            //Invio query all'utente
+                            //Se l'activity queryUser non è attiva, sveglio subito l'activity:
+                            //altrimenti aspetto (?)
 
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+                            //Se l'activity QueryUser non è attiva, falla partire
+                            if (!prefs.getBoolean("active", false)) {
+                                //faccio partire activity QueryUser
+                                Intent intent = new Intent("android.intent.category.LAUNCHER");
+
+                                //Aggiungo all'intent, per ogni iterazione, ogni elemento del JSONarray
+                                intent.putExtra("Data", message);
+
+                                intent.setClassName("com.alesp.feedbackapp", "com.alesp.feedbackapp.QueryUser");
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+
+
+                            }
+                            else{
+                                Log.d("WakeupService","Activity già aperta");//E qui?
+                            }
+
+                            break;
+
+                        case "acceptData":
+
+                            //Notifico i dati all'activity tramite broadcastmanager.
+                            //all'activity invio un oggetto JSON con l'attività corrente
+                            currentActivity = (JSONObject) ActivityRecognition.sortActivities(new JSONObject(message)).get(0);
+                            sendToActivity(currentActivity.toString());
+
+                            break;
 
                     }
-                    else{
-                        Log.d("WakeupService","Activity già aperta");//E qui?
+
+                    } catch (JSONException e){
+                        Log.e("WakeUpService",e.toString());
                     }
+
+
 
 
                 }

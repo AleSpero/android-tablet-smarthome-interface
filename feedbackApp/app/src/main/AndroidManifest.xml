@@ -34,7 +34,7 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:screenOrientation="landscape"></activity>
 
-        <activity android:name=".IdleActivity"
+        <activity android:name=".ActivityRecognition"
             android:launchMode="singleTop"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
         android:screenOrientation="landscape"

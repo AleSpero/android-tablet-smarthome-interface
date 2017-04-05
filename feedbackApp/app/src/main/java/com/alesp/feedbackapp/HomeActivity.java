@@ -1,11 +1,15 @@
 package com.alesp.feedbackapp;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -103,7 +107,7 @@ public class HomeActivity extends Activity {
                         ),
                         //Setto dummy per i settings (che rimuovo in automatico durante il crossfade
 
-                        //NB: MAGARI UTILIZZA SETVISIBILITY SUL PRIMARYDRAWERITEM?
+                        //NB: OCCHIO CHE SE NON VIENE CHIUSO L'EXPANDAABLE E POI CHIUSO IL DRAWER SI IMPALLA TUTTO! SISTEMA
                         dummy,
                         about)
                         .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
@@ -137,10 +141,13 @@ public class HomeActivity extends Activity {
 
                             case ACTIVITY_RECOGNITION:
                                 //Faccio partire il service
-                                //Differenza tra mini e complete in termini di azioni?
-                                Log.d("HomeActivity","activityrec");
-                                startActivity(new Intent(HomeActivity.this,IdleActivity.class));
+                                //Se ho cliccato sul minidrawer, faccio partire l'app senza farla vedere (così parte in automatico il service)
+                                Intent intent = new Intent(HomeActivity.this,ActivityRecognition.class);
+
+                                startActivity(intent);
+
                                 result.setSelection(-1);
+                                Log.d("HomeActivity","activityrec");
                                 break;
 
                             case SENSOR_DATA:
@@ -278,6 +285,18 @@ public class HomeActivity extends Activity {
                         if(isChecked){
                             //Attivo
                             edit.putBoolean("voiceEnabled", true);
+
+
+                            //controllo permission
+                            if (ContextCompat.checkSelfPermission(HomeActivity.this,
+                                    Manifest.permission.RECORD_AUDIO)
+                                    != PackageManager.PERMISSION_GRANTED) {
+
+                                ActivityCompat.requestPermissions(HomeActivity.this,
+                                        new String[]{Manifest.permission.RECORD_AUDIO},
+                                        0);
+
+                            }
                         }
                         else{
                             //disattivo

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/homeContainer">
+
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="50dp"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="20dp">
+
+            <ImageButton
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:id="@+id/back"
+                android:src="@drawable/ic_action_back"
+                android:background="@color/material_drawer_background"
+                android:gravity="center_vertical"
+                android:padding="8dp"
+                android:scaleType="fitCenter"/>
+
+            <TextView
+                android:text="@string/controlPanel"
+                android:fontFamily="sans-serif-thin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="-70dp"
+                android:id="@+id/title"
+                android:textSize="70sp"
+                android:textAlignment="center"
+                android:textColor="?android:attr/textColorTertiary" />
+
+
+
+        </LinearLayout>
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginLeft="-30dp">
+
+        <TextView
+            android:layout_marginTop="10dp"
+            android:text="@string/notActive"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="25sp"
+            android:textAlignment="center"
+            android:visibility="invisible"
+            android:id="@+id/currently" />
+
+
+            </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginLeft="-30dp"
+            android:layout_marginTop="70dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <ImageButton
+                android:id="@+id/first_activity"
+                android:text="Button"
+                android:textColor="?android:attr/textColorTertiary"
+                android:textSize="30sp"
+                style="@style/CustomButton"
+                android:layout_width="260dp"
+                android:layout_height="260dp"
+                android:background="@drawable/buttonshape"
+                app:srcCompat="@drawable/ic_play_button_sing"
+                android:adjustViewBounds="true"
+                android:padding="70dp"
+                android:scaleType="fitCenter"
+                android:visibility="gone"/>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Listening for data..."
+                android:layout_marginTop="60dp"
+                android:layout_marginLeft="10dp"
+                android:fontFamily="sans-serif-thin"
+                android:id="@+id/currentActivity"
+                android:textSize="40sp"></TextView>
+
+                <com.wang.avi.AVLoadingIndicatorView
+                    android:id="@+id/avi"
+                    android:layout_marginTop="20dp"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    app:indicatorName="BallSpinFadeLoaderIndicator"
+                    app:indicatorColor="#878787"
+                    />
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
