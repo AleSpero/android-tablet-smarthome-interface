@@ -23,6 +23,7 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -94,14 +95,16 @@ public class ActivityRecognition extends Activity {
                             //creo alertdialog e faccio terminare il servizio
                             new AlertDialog.Builder(ActivityRecognition.this)
                                     .setTitle("Connection not available")
-                                    .setMessage("Couldn't connect to the server. Please try later")
+                                    .setMessage("Couldn't connect to the server.\nPlease try later.")
                                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             disconnectService();
+                                            finish();
                                         }
                                     })
-                                    .show();
+                                    .show()
+                                    .setCanceledOnTouchOutside(false);
 
 
                         }
@@ -153,7 +156,13 @@ public class ActivityRecognition extends Activity {
                     //rimuovo cose varie e aggiungo altre cose
                     findViewById(R.id.currently).setVisibility(View.VISIBLE);
                     currentActivity.setVisibility(View.VISIBLE);
-                    avi.setVisibility(View.INVISIBLE);
+                    avi.setVisibility(View.GONE);
+
+                    //diminuisco margin di currentactivitytext
+                    LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                    llp.setMargins(0, 20, 0, 0); // llp.setMargins(left, top, right, bottom);
+                    currentActivityText.setLayoutParams(llp);
+
                     firstDataReceived = false;
                 }
 

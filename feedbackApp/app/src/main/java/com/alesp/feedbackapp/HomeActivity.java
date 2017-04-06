@@ -116,26 +116,11 @@ public class HomeActivity extends Activity {
                         if (drawerItem instanceof Nameable) {
                            // Toast.makeText(MiniDrawerActivity.this, ((Nameable) drawerItem).getName().getText(MiniDrawerActivity.this), Toast.LENGTH_SHORT).show();
                         }
-                        Log.d("position",position+"");
+                        //Log.d("position",position+"");
                         switch (position){
 
                             case CONTROL_PANEL:
-                                Log.d("lol","what");
-                                if(!isExpanded){
-                                    //Apro drawer completo
-                                    Log.d("HomeActivity","espando");
-                                    crossfaderWrapper.crossfade();
-                                    isExpanded = true;
-                                    controlpanel.withIcon(GoogleMaterial.Icon.gmd_arrow_back);
-                                }
-                                else{
-                                    //chiudo drawer
-                                    crossfaderWrapper.crossfade();
-                                    Log.d("HomeActivity","riduco");
-                                    isExpanded = false;
-                                    controlpanel.withIcon(GoogleMaterial.Icon.gmd_menu);
-
-                                }
+                                crossFader.crossFade();
                                 result.setSelection(-1);
                                 break;
 
@@ -143,10 +128,10 @@ public class HomeActivity extends Activity {
                                 //Faccio partire il service
                                 //Se ho cliccato sul minidrawer, faccio partire l'app senza farla vedere (così parte in automatico il service)
                                 Intent intent = new Intent(HomeActivity.this,ActivityRecognition.class);
-
+                                result.setSelection(-1);
                                 startActivity(intent);
 
-                                result.setSelection(-1);
+
                                 Log.d("HomeActivity","activityrec");
                                 break;
 
@@ -160,6 +145,7 @@ public class HomeActivity extends Activity {
                                 //Apro drawer completo e apro expandable
                                 Log.d("HomeActivity","settings");
                                 crossFader.crossFade();
+                                result.setSelection(-1);
                                // result.setSelectionAtPosition(4);
                                 //startActivity(new Intent(HomeActivity.this,SettingsActivity.class));
                                 break;
@@ -167,6 +153,7 @@ public class HomeActivity extends Activity {
                             case SETTINGS_DUMMY:
                                 Log.d("HomeActivity","settingsDummy");
                                 crossFader.crossFade();
+                                result.setSelection(-1);
                                 break;
 
                             case ABOUT:
@@ -232,14 +219,20 @@ public class HomeActivity extends Activity {
 
             @Override
             public void onPanelOpened(View panel) {
-
+                controlpanel.withIcon(GoogleMaterial.Icon.gmd_arrow_back);
             }
 
             @Override
             public void onPanelClosed(View panel) {
-                Log.d("lolol",result.getDrawerItems().size()+"");
-                if(result.getDrawerItems().size()!=7)
-                result.addItemAtPosition(dummy,5);
+
+                controlpanel.withIcon(GoogleMaterial.Icon.gmd_menu);
+
+                //collapso l'expandabledraweritem
+                if(result.getDrawerItems().size()!=7) {
+                    result.addItemAtPosition(dummy, 5);
+                }
+                result.getAdapter().collapse();
+                result.setSelection(-1);
             }
         });
 

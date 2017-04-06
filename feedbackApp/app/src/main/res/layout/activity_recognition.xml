@@ -26,11 +26,12 @@
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="70dp"
+                android:layout_marginTop="20dp"
                 android:id="@+id/back"
                 android:src="@drawable/ic_action_back"
                 android:background="@color/material_drawer_background"
                 android:gravity="center_vertical"
-                android:padding="8dp"
+                android:padding="16dp"
                 android:scaleType="fitCenter"/>
 
             <TextView
@@ -38,7 +39,7 @@
                 android:fontFamily="sans-serif-thin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="-70dp"
+                android:layout_marginLeft="-80dp"
                 android:id="@+id/title"
                 android:textSize="70sp"
                 android:textAlignment="center"
@@ -104,13 +105,14 @@
                 android:layout_marginLeft="10dp"
                 android:fontFamily="sans-serif-thin"
                 android:id="@+id/currentActivity"
-                android:textSize="40sp"></TextView>
+                android:textSize="30sp"></TextView>
 
                 <com.wang.avi.AVLoadingIndicatorView
                     android:id="@+id/avi"
-                    android:layout_marginTop="20dp"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
+                    android:layout_marginTop="70dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     app:indicatorName="BallSpinFadeLoaderIndicator"
                     app:indicatorColor="#878787"
                     />
