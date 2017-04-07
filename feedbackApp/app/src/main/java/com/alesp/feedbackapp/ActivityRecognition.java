@@ -147,36 +147,57 @@ public class ActivityRecognition extends Activity {
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                //Ricevo dati dal service ed aggiorno l'UI
-                String result = intent.getStringExtra("CURRENT_ACTIVITY");
-                JSONObject obj;
 
-                //controllo se sono i primi dati ricevuti (se si rimuovo scritte e robe varie)
-                if (firstDataReceived) {
-                    //rimuovo cose varie e aggiungo altre cose
-                    findViewById(R.id.currently).setVisibility(View.VISIBLE);
-                    currentActivity.setVisibility(View.VISIBLE);
-                    avi.setVisibility(View.GONE);
+                //Controllo prima di tutto se ho ricevuto un avviso di connessione persa:
+                //se si termino tutto.
 
-                    //diminuisco margin di currentactivitytext
-                    LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    llp.setMargins(0, 20, 0, 0); // llp.setMargins(left, top, right, bottom);
-                    currentActivityText.setLayoutParams(llp);
-
-                    firstDataReceived = false;
+                if(intent.getBooleanExtra("CONNECTION_LOST",false)){
+                    //creo alertdialog e faccio terminare il servizio
+                    new AlertDialog.Builder(ActivityRecognition.this)
+                            .setTitle("Lost Connection")
+                            .setMessage("Lost connection to the server.\nPlease try later.")
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    disconnectService();
+                                    finish();
+                                }
+                            })
+                            .show()
+                            .setCanceledOnTouchOutside(false);
                 }
+                else {
 
-                try {
-                    obj = new JSONObject(result);
-                    //scrivi in database qui o nel service? boh
-                    //cambio testo textview
-                    currentActivityText.setText(obj.getString("activity"));
-                    //Devo anche cambiare immagine nel bottone
+                    //Ricevo dati dal service ed aggiorno l'UI
+                    String result = intent.getStringExtra("CURRENT_ACTIVITY");
+                    JSONObject obj;
 
-                } catch (JSONException e) {
-                    Log.e("ActivityRecognition", e.toString());
+                    //controllo se sono i primi dati ricevuti (se si rimuovo scritte e robe varie)
+                    if (firstDataReceived) {
+                        //rimuovo cose varie e aggiungo altre cose
+                        findViewById(R.id.currently).setVisibility(View.VISIBLE);
+                        currentActivity.setVisibility(View.VISIBLE);
+                        avi.setVisibility(View.GONE);
+
+                        //diminuisco margin di currentactivitytext
+                        LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                        llp.setMargins(0, 20, 0, 0); // llp.setMargins(left, top, right, bottom);
+                        currentActivityText.setLayoutParams(llp);
+
+                        firstDataReceived = false;
+                    }
+
+                    try {
+                        obj = new JSONObject(result);
+                        //scrivi in database qui o nel service? boh
+                        //cambio testo textview
+                        currentActivityText.setText(obj.getString("activity"));
+                        //Devo anche cambiare immagine nel bottone
+
+                    } catch (JSONException e) {
+                        Log.e("ActivityRecognition", e.toString());
+                    }
                 }
-
             }
         };
 
@@ -218,6 +239,12 @@ public class ActivityRecognition extends Activity {
     public void onStop() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
         super.onStop();
+    }
+
+    @Override
+    public void onBackPressed(){
+        //migliora e metti a posto (deve solo cosare l'activity, non tutta l'app)
+        moveTaskToBack(true);
     }
 
     //Metodi custom

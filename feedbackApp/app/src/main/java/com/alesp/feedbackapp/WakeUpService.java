@@ -194,6 +194,17 @@ public class WakeUpService extends Service {
                 public void onDisconnect(Socket socket, String message) {
                     Log.v("WakeUpService", "Disconnected");
                     connected = false;
+
+                    //In questo metodo "avviso" l'app che è caduta la connessione
+
+                    Intent intent = new Intent("NOTIFY_ACTIVITY");
+
+                    if(message != null){
+                        intent.putExtra("CONNECTION_LOST",true);
+                    }
+
+                    //invio messaggio tramite broadcaster
+                    broadcast.sendBroadcast(intent);
                 }
 
                 @Override

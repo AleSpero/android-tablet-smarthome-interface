@@ -1,5 +1,7 @@
 package com.alesp.feedbackapp;
 
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -20,6 +22,8 @@ public class Client {
     private int port;
     private ConnectionListener listener=null;
 
+    Thread checkConnectionThread;
+
     public Client(String ip, int port){
         this.ip=ip;
         this.port=port;
@@ -29,6 +33,7 @@ public class Client {
         new Thread(new Runnable() {
             @Override
             public void run() {
+
                 socket = new Socket();
                 InetSocketAddress socketAddress = new InetSocketAddress(ip, port);
                 try {
@@ -36,7 +41,13 @@ public class Client {
                     socketOutput = socket.getOutputStream();
                     socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
+                    //Faccio partire thread che gestisce la ricezione dei dati
                     new ReceiveThread().start();
+
+                    //Faccio partire thread che gestisce il connection check
+                   checkConnectionThread = new Thread(new SendRunnable(true));
+                    checkConnectionThread.start();
+
 
                     if(listener!=null)
                         listener.onConnect(socket);
@@ -55,6 +66,8 @@ public class Client {
             if(listener!=null)
                 listener.onDisconnect(socket, e.getMessage());
         }
+
+
     }
 
     public void send(String message){
@@ -70,7 +83,7 @@ public class Client {
         public void run(){
             String message;
             try {
-                while((message = socketInput.readLine()) != null) {   // each line must end with a \n to be received
+                while((message = socketInput.readLine()) != null) {// each line must end with a \n to be received
                     if(listener!=null)
                         listener.onMessage(message);
                 }
@@ -98,17 +111,45 @@ public class Client {
 
         //definisco il dato da inviare
         private String data;
+        boolean isCheckingConnection = false;
 
         public SendRunnable(String message){
             data=message;
+            isCheckingConnection = false;
         }
 
-        public void run(){
-            try {
-                socketOutput.write(data.getBytes());
-            } catch (IOException e) {
-                if(listener!=null)
-                    listener.onDisconnect(socket, e.getMessage());
+        public SendRunnable(boolean check){
+            data="Connection check";
+            isCheckingConnection = check;
+        }
+
+        public void run() {
+
+            if (isCheckingConnection) {
+                try {
+                    while (isCheckingConnection) {
+                        Thread.sleep(10000);
+                        try {
+                            socketOutput.write(data.getBytes());
+                        } catch (IOException e) {
+                            if (listener != null) {
+                                listener.onDisconnect(socket, e.getMessage());
+                                isCheckingConnection = false;
+                            }
+
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e("Client", e.toString());
+                }
+            } else {
+
+                try {
+                    socketOutput.write(data.getBytes());
+                } catch (IOException e) {
+                    if (listener != null)
+                        listener.onDisconnect(socket, e.getMessage());
+                }
             }
         }
     }

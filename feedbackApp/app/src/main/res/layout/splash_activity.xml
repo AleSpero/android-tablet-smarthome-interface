@@ -21,7 +21,7 @@
         android:layout_marginTop="130dp">
 
         <TextView
-            android:text="Feedback App"
+            android:text="SmartLab Activity Recognition"
             android:fontFamily="sans-serif-thin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -34,7 +34,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/textView"
-            android:layout_marginTop="-15dp"
             android:layout_marginLeft="200dp"/>
 
         <LinearLayout
@@ -43,16 +42,6 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_horizontal">
-
-            <com.wang.avi.AVLoadingIndicatorView
-                android:id="@+id/avi"
-                android:layout_width="30dp"
-                 android:layout_height="30dp"
-                app:indicatorName="BallPulseIndicator"
-                app:indicatorColor="#424242"
-                android:visibility="invisible"
-
-            />
 
             <TextView
                 android:layout_width="wrap_content"

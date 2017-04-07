@@ -87,8 +87,7 @@ public class HomeActivity extends Activity {
         final PrimaryDrawerItem about = new PrimaryDrawerItem()
                 .withName(getString(R.string.about))
                 .withIcon(GoogleMaterial.Icon.gmd_info)
-                .withIdentifier(ABOUT)
-                .withSelectable(false);
+                .withIdentifier(ABOUT);
 
         //CREAZIONE DRAWER
         result = new DrawerBuilder()
@@ -97,7 +96,7 @@ public class HomeActivity extends Activity {
                         //aggiungo elementi al mio Drawer
                         controlpanel,
                         new DividerDrawerItem(),
-                        new PrimaryDrawerItem().withDescription("Starts the activity recognition service").withName("Activity Recognition").withIcon(GoogleMaterial.Icon.gmd_directions_walk).withIdentifier(ACTIVITY_RECOGNITION),
+                        new PrimaryDrawerItem().withName("Activity Recognition").withIcon(GoogleMaterial.Icon.gmd_directions_walk).withIdentifier(ACTIVITY_RECOGNITION),
                         new PrimaryDrawerItem().withName("Sensor Data").withIcon(FontAwesome.Icon.faw_bar_chart).withIdentifier(SENSOR_DATA),
                         //Setto collapsable per i settings
                         new ExpandableDrawerItem().withName(getString(R.string.settings)).withIcon(GoogleMaterial.Icon.gmd_settings).withIdentifier(SETTINGS).withSelectable(false).withSubItems(
@@ -211,6 +210,10 @@ public class HomeActivity extends Activity {
                         //rimetto tutto
                         about.withIcon(GoogleMaterial.Icon.gmd_info);
                         about.withName(R.string.about);
+
+                        //cambio icona controlpanel
+                        controlpanel.withIcon(GoogleMaterial.Icon.gmd_arrow_back);
+                        result.updateItem(controlpanel);
                     }
 
                 }
@@ -219,13 +222,13 @@ public class HomeActivity extends Activity {
 
             @Override
             public void onPanelOpened(View panel) {
-                controlpanel.withIcon(GoogleMaterial.Icon.gmd_arrow_back);
             }
 
             @Override
             public void onPanelClosed(View panel) {
 
                 controlpanel.withIcon(GoogleMaterial.Icon.gmd_menu);
+                result.updateItem(controlpanel);
 
                 //collapso l'expandabledraweritem
                 if(result.getDrawerItems().size()!=7) {
