@@ -57,6 +57,8 @@ public class QueryUser extends Activity implements RecognitionListener {
     Button otheractivity;
     RecognitionProgressView progress;
     TextView userinput;
+    TextView firstactivityText;
+    TextView secondactivityText;
 
     //creo variabile per text to speech
     TextToSpeech textToSpeech;
@@ -265,6 +267,8 @@ public class QueryUser extends Activity implements RecognitionListener {
         // otheractivity = (Button) findViewById(R.id.other);
         progress = (RecognitionProgressView) findViewById(R.id.progress);
         userinput = (TextView) findViewById(R.id.userinput);
+        firstactivityText = (TextView) findViewById(R.id.firstactivity_text);
+        secondactivityText = (TextView) findViewById(R.id.secondactivity_text);
 
         //Effettuo il binding con WakeUpService
         Intent servIntent = new Intent(QueryUser.this, WakeUpService.class);
@@ -348,9 +352,9 @@ public class QueryUser extends Activity implements RecognitionListener {
 
                             switch (utteranceId) {
                                 case "WHICH_ACTIVITY":
-                                    textToSpeech.speak("Are you " + firstactivity.getText().toString()
+                                    textToSpeech.speak("Are you " + firstactivityText.getText().toString()
                                             + " ?", TextToSpeech.QUEUE_ADD, null, null);
-                                    textToSpeech.speak("Or are you" + secondactivity.getText().toString() + " ?", TextToSpeech.QUEUE_ADD, null, "SPECIFIC");
+                                    textToSpeech.speak("Or are you" + secondactivityText.getText().toString() + " ?", TextToSpeech.QUEUE_ADD, null, "SPECIFIC");
                                     break;
 
                                 case "SPECIFIC":
@@ -444,82 +448,11 @@ public class QueryUser extends Activity implements RecognitionListener {
             sortedActivities = ActivityRecognition.sortActivities(receivedData);
 
             //Aggiorno i bottoni con le attività più probabili
-            firstactivity.setText((String) sortedActivities.getJSONObject(0).get("activity"));
-            secondactivity.setText((String) sortedActivities.getJSONObject(1).get("activity"));
+            firstactivityText.setText((String) sortedActivities.getJSONObject(0).get("activity"));
+            secondactivityText.setText((String) sortedActivities.getJSONObject(1).get("activity"));
+
+
             //thirdactivity.setText((String)sortedActivities.getJSONObject(2).get("activity"));
-
-
-            //Setto gli onclick listener per il bottone other (che cambia i primi 3 bottoni) e gli altri bottoni
-               /*
-
-
-               QUESTO NON SERVE, SICCOME FACCIO VEDERE SOLO 2 ATTIVITA'. tuttavia non lo tolgo (per ora)
-
-
-
-               otheractivity.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        //se "altro" è già stato premuto, allora esso fungerà da tasto "back". e quindi displayerà le prime 3 attività.
-                        //altrimenti, mostra le attività 4-5-6
-                        if(otherbuttonPressed){
-                            try {
-                                firstactivity.setText((String) sortedActivities.getJSONObject(0).get("activity"));
-                                secondactivity.setText((String) sortedActivities.getJSONObject(1).get("activity"));
-                                //thirdactivity.setText((String) sortedActivities.getJSONObject(2).get("activity"));
-
-                                otheractivity.setText(R.string.other);
-
-                                //Faccio animazioni carine
-                                YoYo.with(Techniques.FadeIn)
-                                        .duration(500)
-                                        .playOn(findViewById(R.id.first_activity));
-
-                                YoYo.with(Techniques.FadeIn)
-                                        .duration(500)
-                                        .playOn(findViewById(R.id.second_activity));
-
-                                YoYo.with(Techniques.FadeIn)
-                                        .duration(500)
-                                        .playOn(findViewById(R.id.third_activity));
-
-                                //setto otherbuttonpressed
-                                otherbuttonPressed = false;
-                            }
-                            catch(JSONException e){
-                                Log.e("QueryUser,OnClick",e.toString());
-                            }
-                        }
-                        else{
-                            try {
-                                firstactivity.setText((String) sortedActivities.getJSONObject(3).get("activity"));
-                                secondactivity.setText((String) sortedActivities.getJSONObject(4).get("activity"));
-                                //thirdactivity.setText((String) sortedActivities.getJSONObject(5).get("activity"));
-
-                                otheractivity.setText(R.string.back);
-
-                                //Faccio animazioni carine
-                                YoYo.with(Techniques.FadeIn)
-                                        .duration(800)
-                                        .playOn(findViewById(R.id.first_activity));
-
-                                YoYo.with(Techniques.FadeIn)
-                                        .duration(800)
-                                        .playOn(findViewById(R.id.second_activity));
-
-                                YoYo.with(Techniques.FadeIn)
-                                        .duration(800)
-                                        .playOn(findViewById(R.id.third_activity));
-
-                                //setto otherbuttonpressed
-                                otherbuttonPressed = true;
-                            }
-                            catch(JSONException e){
-                                Log.e("QueryUser,OnClick",e.toString());
-                            }
-                        }
-                    }
-                });*/
 
 
             //setto listener per bottoni.
@@ -539,40 +472,6 @@ public class QueryUser extends Activity implements RecognitionListener {
                     processFeedback(SECOND_ACTIVITY);
                 }
             });
-
-               /* thirdactivity.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        //questa variabile è utilizzata per controllare se è stato premuto il tasto "altro", qunidi se sono da
-                        //selezionare le prime 3 attività o le ultime 3.
-
-                        int index = !otherbuttonPressed ? 2 : 5;
-
-                        //Creo il JSON, e chiamo il servizio WakeUpService per inviarlo al server.
-                        try{
-                            //Prendo l'oggetto JSON dell'attività selezionata
-                            selectedObj = sortedActivities.getJSONObject(index);
-
-                            //Calcolo quanto tempo è passato dall'invio della richiesta all'input dell'utente.
-                            long offset = System.currentTimeMillis()-receivedData.getLong("time");
-
-                            tempObj = new JSONObject("{'requestId'="+receivedData.get("requestId")+", 'offset'="+offset+",'result'='"+selectedObj.get("activity")+"'}");
-
-                            Log.d("Nuovo JSON",tempObj.toString());
-                        }
-                        catch (JSONException e){
-                            Log.e("WakeUpService",e.toString());
-                        }
-
-                        //Procedo con l'invio, segnalo la conferma del feedback e chiudo l'activity
-                        wakeService.sendData(tempObj.toString());
-
-                        animate();
-
-
-                    }
-                }); NB: NON TOLGO IL CODICE PERCHE' POTREBBE SERVIRE UN TERZO BOTTONE*/
-
 
         } catch (JSONException e) {
             Log.e("onServiceConnected", e.toString());
@@ -650,6 +549,14 @@ public class QueryUser extends Activity implements RecognitionListener {
 
         YoYo.with(Techniques.FadeOut)
                 .duration(700)
+                .playOn(firstactivityText);
+
+        YoYo.with(Techniques.FadeOut)
+                .duration(700)
+                .playOn(secondactivityText);
+
+        YoYo.with(Techniques.FadeOut)
+                .duration(700)
                 .playOn(findViewById(R.id.titleDescr));
 
         YoYo.with(Techniques.FadeOut)
@@ -673,6 +580,8 @@ public class QueryUser extends Activity implements RecognitionListener {
                 //rimuovo i vari elementi dalla view, per fare posto alla scritta con "feedback ricevuto"
                 firstactivity.setVisibility(View.GONE);
                 secondactivity.setVisibility(View.GONE);
+                firstactivityText.setVisibility(View.GONE);
+                secondactivityText.setVisibility(View.GONE);
                 //thirdactivity.setVisibility(View.GONE);
                 findViewById(R.id.titleDescr).setVisibility(View.GONE);
                 findViewById(R.id.title).setVisibility(View.GONE);
@@ -848,8 +757,8 @@ public class QueryUser extends Activity implements RecognitionListener {
         int i=0;
 
 
-        String first = firstactivity.getText().toString().toLowerCase();
-        String second = secondactivity.getText().toString().toLowerCase();
+        String first = firstactivityText.getText().toString().toLowerCase();
+        String second = secondactivityText.getText().toString().toLowerCase();
 
 
         do{

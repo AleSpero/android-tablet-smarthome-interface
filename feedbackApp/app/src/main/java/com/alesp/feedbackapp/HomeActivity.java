@@ -127,6 +127,7 @@ public class HomeActivity extends Activity {
                                 //Faccio partire il service
                                 //Se ho cliccato sul minidrawer, faccio partire l'app senza farla vedere (così parte in automatico il service)
                                 Intent intent = new Intent(HomeActivity.this,ActivityRecognition.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 result.setSelection(-1);
                                 startActivity(intent);
 

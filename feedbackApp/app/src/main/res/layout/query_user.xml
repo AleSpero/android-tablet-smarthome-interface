@@ -31,7 +31,7 @@
             android:id="@+id/titleDescr" />
 
         <LinearLayout
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:layout_width="wrap_content"
             android:layout_height="81dp"
             android:layout_gravity="center_horizontal">
@@ -80,19 +80,20 @@
 
 
         <LinearLayout
-            android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_horizontal"
             android:splitMotionEvents="false">
 
-
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:orientation="vertical">
 
             <Button
                 android:id="@+id/first_activity"
-
-                android:text="Button"
+                android:gravity="center_horizontal"
                 android:textColor="?android:attr/textColorTertiary"
                 android:textSize="25sp"
 style="@style/CustomButton"
@@ -102,10 +103,26 @@ style="@style/CustomButton"
                 android:layout_marginRight="50dp"
                 />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Listening for data..."
+                    android:layout_marginTop="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:fontFamily="sans-serif-thin"
+                    android:id="@+id/firstactivity_text"
+                    android:textSize="30sp"
+                    android:gravity="center_horizontal"></TextView>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:orientation="vertical">
+
             <Button
                 android:id="@+id/second_activity"
-
-                android:text="Button"
                 android:textSize="25sp"
                 style="@style/CustomButton"
                 android:layout_width="260dp"
@@ -113,10 +130,22 @@ style="@style/CustomButton"
                 android:background="@drawable/buttonshape"
                 android:textColor="?android:attr/textColorTertiary" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Listening for data..."
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_horizontal"
+                    android:fontFamily="sans-serif-thin"
+                    android:id="@+id/secondactivity_text"
+                    android:textSize="30sp"></TextView>
+
+            </LinearLayout>
+
             <Button
+                android:gravity="center_horizontal"
                 android:id="@+id/third_activity"
                 android:visibility="gone"
-                android:text="Button"
                 android:textSize="25sp"
                 style="@style/CustomButton"
                 android:layout_width="260dp"

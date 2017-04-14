@@ -244,7 +244,8 @@ public class ActivityRecognition extends Activity {
     @Override
     public void onBackPressed(){
         //migliora e metti a posto (deve solo cosare l'activity, non tutta l'app)
-        moveTaskToBack(true);
+        //DA FARE: GESTISCI SAVEDINSTANCESTATE
+       startActivity(new Intent(ActivityRecognition.this,HomeActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
     }
 
     //Metodi custom
