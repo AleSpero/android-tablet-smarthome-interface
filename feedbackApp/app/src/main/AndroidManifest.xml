@@ -45,6 +45,11 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:screenOrientation="landscape"></activity>
 
+        <activity android:name=".SensorDataWebView"
+            android:launchMode="singleTop"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:screenOrientation="landscape"></activity>
+
     </application>
 
 </manifest>

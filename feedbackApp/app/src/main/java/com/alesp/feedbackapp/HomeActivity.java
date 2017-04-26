@@ -139,6 +139,7 @@ public class HomeActivity extends Activity {
                                 //Activity dati sensori
                                 Log.d("HomeActivity","sensordata");
                                 result.setSelection(-1);
+                                startActivity(new Intent(HomeActivity.this,SensorDataWebView.class));
                                 break;
 
                             case SETTINGS:

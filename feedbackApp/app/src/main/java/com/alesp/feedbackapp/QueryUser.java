@@ -154,7 +154,8 @@ public class QueryUser extends Activity implements RecognitionListener {
                                     finish();
                                 }
                             })
-                            .show();
+                            .show()
+                            .setCanceledOnTouchOutside(false);
                     break;
                 case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
                     message = "RecognitionService busy";
@@ -687,7 +688,8 @@ public class QueryUser extends Activity implements RecognitionListener {
                                 finish();
                             }
                         })
-                        .show();
+                        .show()
+                        .setCanceledOnTouchOutside(false);
 
                //FAI ALERT DIALOG CHIEDENDO PERMISSIONS
                 message = "Insufficient permissions";
