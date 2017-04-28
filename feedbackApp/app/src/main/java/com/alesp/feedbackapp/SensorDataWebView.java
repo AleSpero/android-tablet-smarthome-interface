@@ -41,6 +41,7 @@ public class SensorDataWebView extends Activity {
         //Attivo il tablet a poter utilizzare codice javascript
 
         webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setUseWideViewPort(true);
 
         webView.setWebContentsDebuggingEnabled(true);
 
