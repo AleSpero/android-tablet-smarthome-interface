@@ -4,10 +4,10 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
 
     <!-- Definition for the MiniDrawer item -->
-    <dimen name="material_mini_drawer_item">99dp</dimen>
-    <dimen name="material_mini_drawer_item_padding">16dp</dimen>
+    <dimen name="material_mini_drawer_item">93dp</dimen>
+    <dimen name="material_mini_drawer_item_padding">8dp</dimen>
     <dimen name="material_mini_drawer_item_padding_sides">8dp</dimen>
-    <dimen name="material_mini_drawer_item_icon">56dp</dimen>
+    <dimen name="material_mini_drawer_item_icon">52dp</dimen>
     <dimen name="material_mini_drawer_item_icon_padding">8dp</dimen>
     <dimen name="material_mini_drawer_item_badge_text">12sp</dimen>
     <dimen name="material_mini_drawer_item_profile_icon">40dp</dimen>
@@ -19,7 +19,7 @@
     <dimen name="material_drawer_item_padding">4dp</dimen>
 
     <!-- Definition for the primary item -->
-    <dimen name="material_drawer_item_primary">99dp</dimen>
+    <dimen name="material_drawer_item_primary">93dp</dimen>
     <dimen name="material_drawer_item_primary_icon">62dp</dimen>
     <dimen name="material_drawer_item_primary_icon_padding">8dp</dimen>
     <dimen name="material_drawer_item_primary_icon_padding_right">32dp</dimen>

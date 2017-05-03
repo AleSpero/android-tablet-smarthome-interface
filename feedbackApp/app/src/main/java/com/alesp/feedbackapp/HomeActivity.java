@@ -2,6 +2,8 @@ package com.alesp.feedbackapp;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -11,11 +13,14 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SlidingPaneLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
@@ -58,10 +63,17 @@ public class HomeActivity extends Activity {
     //gestisco costanti per gestire gli elementi del drawer
     final static int CONTROL_PANEL = 0;
     final static int ACTIVITY_RECOGNITION = 2;
-    final static int SENSOR_DATA = 3;
-    final static int SETTINGS_DUMMY = 5;
-    final static int SETTINGS = 6;
-    final static int ABOUT = 7;
+    final static int DASHBOARD = 3;
+    final static int SENSOR_DATA = 4;
+    final static int LOG = 5;
+    final static int SETTINGS_DUMMY = 7;
+    final static int SETTINGS = 8;
+    final static int ABOUT = 9;
+
+    //Inizializzo variabili webview
+    WebView webView; //abbastanza autoesplicativo
+    String url = "159.149.152.241";
+    ProgressDialog progress;
 
 
 
@@ -97,7 +109,9 @@ public class HomeActivity extends Activity {
                         controlpanel,
                         new DividerDrawerItem(),
                         new PrimaryDrawerItem().withName("Activity Recognition").withIcon(GoogleMaterial.Icon.gmd_directions_walk).withIdentifier(ACTIVITY_RECOGNITION),
+                        new PrimaryDrawerItem().withName("Dashboard").withIcon(GoogleMaterial.Icon.gmd_dashboard).withIdentifier(DASHBOARD),
                         new PrimaryDrawerItem().withName("Sensor Data").withIcon(FontAwesome.Icon.faw_bar_chart).withIdentifier(SENSOR_DATA),
+                        new PrimaryDrawerItem().withName("Log").withIcon(FontAwesome.Icon.faw_file_text_o).withIdentifier(LOG),
                         //Setto collapsable per i settings
                         new ExpandableDrawerItem().withName(getString(R.string.settings)).withIcon(GoogleMaterial.Icon.gmd_settings).withIdentifier(SETTINGS).withSelectable(false).withSubItems(
                                 new SecondarySwitchDrawerItem().withName("Enable Voice Recognition").withIcon(GoogleMaterial.Icon.gmd_mic).withChecked(true).withOnCheckedChangeListener(onCheckedChangeListener)
@@ -135,11 +149,23 @@ public class HomeActivity extends Activity {
                                 Log.d("HomeActivity","activityrec");
                                 break;
 
+                            case DASHBOARD:
+                                Log.d("HomeActivity","dashboard");
+                                result.setSelection(-1);
+                                loadPage(DASHBOARD);
+                                break;
+
                             case SENSOR_DATA:
                                 //Activity dati sensori
                                 Log.d("HomeActivity","sensordata");
                                 result.setSelection(-1);
-                                startActivity(new Intent(HomeActivity.this,SensorDataWebView.class));
+                                loadPage(SENSOR_DATA);
+                                break;
+
+                            case LOG:
+                                Log.d("HomeActivity","dashboard");
+                                result.setSelection(-1);
+                                loadPage(LOG);
                                 break;
 
                             case SETTINGS:
@@ -201,13 +227,13 @@ public class HomeActivity extends Activity {
 
                 if(slideOffset!=0){
                     //If per prevenire che vengano cancellati altri elementi
-                    if(result.getDrawerItems().size()==7) {
+                    if(result.getDrawerItems().size()==9) {
                         about.withIcon(R.drawable.noicon);
                         about.withName("");
 
 
                         //Tolgo il dummy
-                        result.removeItemByPosition(5);
+                        result.removeItemByPosition(7);
 
                         //rimetto tutto
                         about.withIcon(GoogleMaterial.Icon.gmd_info);
@@ -233,8 +259,8 @@ public class HomeActivity extends Activity {
                 result.updateItem(controlpanel);
 
                 //collapso l'expandabledraweritem
-                if(result.getDrawerItems().size()!=7) {
-                    result.addItemAtPosition(dummy, 5);
+                if(result.getDrawerItems().size()!=9) {
+                    result.addItemAtPosition(dummy, 7);
                 }
                 result.getAdapter().collapse();
                 result.setSelection(-1);
@@ -250,6 +276,49 @@ public class HomeActivity extends Activity {
         //Definisco divider
         crossFader.getCrossFadeSlidingPaneLayout().setShadowResourceLeft(R.drawable.divider);
 
+
+        //In questa parte inizializzo la webView.
+        webView = (WebView) findViewById(R.id.webview);
+
+        //Attivo il tablet a poter utilizzare codice javascript
+
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setUseWideViewPort(true);
+
+        progress = new ProgressDialog(this);
+        progress.hide();
+
+        //attivo cross origin per poter visualizzare il grafico delle attività
+        webView.getSettings().setAllowUniversalAccessFromFileURLs(true);
+
+        webView.setWebContentsDebuggingEnabled(true);
+
+        //imposto handler per gli errori
+        webView.setWebViewClient(new WebViewClient(){
+
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl){
+                new AlertDialog.Builder(HomeActivity.this)
+                        .setTitle("Error loading page")
+                        .setMessage("Error loading page: "+description+"\n Code: "+errorCode)
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                            }
+                        })
+                        .show()
+                        .setCanceledOnTouchOutside(false);
+            }
+
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                if(progress.isShowing()){
+                    progress.hide();
+                }
+            }
+
+        });
 
     }
 
@@ -310,6 +379,52 @@ public class HomeActivity extends Activity {
             }
         }
     };
+
+    public void loadPage(int drawerItemId){
+
+        String sideBarItem="";
+
+        //Se la webview non è stata inizalizzata, allora la inizalizzo (metto il progress, blablabla).
+        //altrimenti carico l'url e basta
+
+        if(webView.getVisibility()==View.GONE){
+            progress.setMessage("Connecting...");
+            progress.setIndeterminate(true);
+            progress.setCanceledOnTouchOutside(false);
+            progress.show();
+
+            webView.setVisibility(View.VISIBLE);
+        }
+
+
+        //controllo i valori di sidebarItem per vedere se è la dashboard oppure altri item della sidebar
+        switch(drawerItemId){
+
+            case SENSOR_DATA:
+                sideBarItem = "custom";
+                break;
+
+            case LOG:
+                sideBarItem = "server";
+        }
+
+
+        //Carico pagina
+        webView.loadUrl("http://"+url+"/"+sideBarItem);
+
+        //Se c'è il form, faccio automaticamente il login
+        if(webView.getUrl().contains("login") || true){
+
+            webView.loadUrl("javascript: {" +
+                    "document.getElementsByName('username')[0].value = 'admin';" +
+                    "document.getElementById('inputPassword3').value = 'nPrwsY7b';" +
+                    "var frms = document.getElementsByClass('form-horizontal');" +
+                    "document.getElementsByTagName('input')[2].checked = true;" +
+                    "frms[0].submit(); };");
+        }
+
+
+    }
 
 
 }
