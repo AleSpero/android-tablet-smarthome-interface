@@ -626,6 +626,9 @@ public class QueryUser extends Activity implements RecognitionListener {
         //Successivamente, ottengo l'oggetto JSON che si riferisce ad una determinata attività, estrapolo l'oggetto, e creo l'oggetto json da inviare
         //questo oggetto sarà composto da un id della richiesta, da l'offset ("quanto ci mette l'utente a rispondere") e dalla scelta dell'utente.
 
+        //stoppo il text to speech se sta parlando
+        textToSpeech.stop();
+
         //Creo il JSON, e chiamo il servizio WakeUpService per inviarlo al server.
         try {
             //Prendo l'oggetto JSON dell'attività selezionata
@@ -794,10 +797,6 @@ public class QueryUser extends Activity implements RecognitionListener {
 
             //Chiedo all'utente se ho sbagliato
             textToSpeech.speak(getString(R.string.mistake),TextToSpeech.QUEUE_ADD,null,"MISTAKE");
-
-
-
-
 
         }
 

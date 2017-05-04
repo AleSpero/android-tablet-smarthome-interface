@@ -87,7 +87,7 @@ public class HomeActivity extends Activity {
         //creo dummy
         final PrimaryDrawerItem dummy = new PrimaryDrawerItem()
                 .withIcon(GoogleMaterial.Icon.gmd_settings)
-                .withIdentifier(5)
+                .withIdentifier(7)
                 .withName("remove");
 
         //memorizzo un draweritem in una variable poichè poi devo cambiare l'icona (control panel)
@@ -119,8 +119,6 @@ public class HomeActivity extends Activity {
 
                         ),
                         //Setto dummy per i settings (che rimuovo in automatico durante il crossfade
-
-                        //NB: OCCHIO CHE SE NON VIENE CHIUSO L'EXPANDAABLE E POI CHIUSO IL DRAWER SI IMPALLA TUTTO! SISTEMA
                         dummy,
                         about)
                         .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
@@ -146,31 +144,31 @@ public class HomeActivity extends Activity {
                                 startActivity(intent);
 
 
-                                Log.d("HomeActivity","activityrec");
+                                Log.d("HomeActivity","activityrec "+position);
                                 break;
 
                             case DASHBOARD:
-                                Log.d("HomeActivity","dashboard");
+                                Log.d("HomeActivity","dashboard "+position);
                                 result.setSelection(-1);
                                 loadPage(DASHBOARD);
                                 break;
 
                             case SENSOR_DATA:
                                 //Activity dati sensori
-                                Log.d("HomeActivity","sensordata");
+                                Log.d("HomeActivity","sensordata "+position);
                                 result.setSelection(-1);
                                 loadPage(SENSOR_DATA);
                                 break;
 
                             case LOG:
-                                Log.d("HomeActivity","dashboard");
+                                Log.d("HomeActivity","log "+position);
                                 result.setSelection(-1);
                                 loadPage(LOG);
                                 break;
 
                             case SETTINGS:
                                 //Apro drawer completo e apro expandable
-                                Log.d("HomeActivity","settings");
+                                Log.d("HomeActivity","settings "+position);
                                 crossFader.crossFade();
                                 result.setSelection(-1);
                                // result.setSelectionAtPosition(4);
@@ -178,16 +176,19 @@ public class HomeActivity extends Activity {
                                 break;
 
                             case SETTINGS_DUMMY:
-                                Log.d("HomeActivity","settingsDummy");
+                                Log.d("HomeActivity","settingsDummy "+position);
                                 crossFader.crossFade();
                                 result.setSelection(-1);
                                 break;
 
                             case ABOUT:
                                 //About
-                                Log.d("HomeActivity","about");
+                                Log.d("HomeActivity","about "+position);
                                 result.setSelection(-1);
                                 break;
+
+                            default:
+                                Log.d("HomeActivity",""+position);
 
                         }
 
@@ -426,6 +427,11 @@ public class HomeActivity extends Activity {
 
     }
 
+    @Override
+    public void onDestroy(){
+        progress.dismiss();
+        super.onDestroy();
+    }
 
 }
 
