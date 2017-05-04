@@ -446,7 +446,7 @@ public class QueryUser extends Activity implements RecognitionListener {
 
             //Chiamo il metodo sortactivities, che prende in input l'oggetto json ricevuto e restituisce un
             //Array JSON ordinato
-            sortedActivities = ActivityRecognition.sortActivities(receivedData);
+            sortedActivities = HomeActivity.sortActivities(receivedData);
 
             //Aggiorno i bottoni con le attività più probabili
             firstactivityText.setText((String) sortedActivities.getJSONObject(0).get("activity"));

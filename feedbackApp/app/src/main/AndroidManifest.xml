@@ -34,12 +34,6 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:screenOrientation="landscape"></activity>
 
-        <activity android:name=".ActivityRecognition"
-            android:launchMode="singleTop"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-        android:screenOrientation="landscape"
-            ></activity>
-
         <activity android:name=".HomeActivity"
             android:launchMode="singleTop"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"

@@ -14,7 +14,7 @@
         android:orientation="vertical"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="80dp"
         >
 
         <LinearLayout
@@ -22,17 +22,6 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingLeft="20dp">
-
-            <ImageButton
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:layout_marginTop="20dp"
-                android:id="@+id/back"
-                android:src="@drawable/ic_action_back"
-                android:background="@color/material_drawer_background"
-                android:gravity="center_vertical"
-                android:padding="16dp"
-                android:scaleType="fitCenter"/>
 
             <TextView
                 android:text="@string/controlPanel"
@@ -57,18 +46,18 @@
             android:orientation="horizontal"
             android:layout_marginLeft="-30dp">
 
-        <TextView
-            android:layout_marginTop="10dp"
-            android:text="@string/notActive"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="25sp"
-            android:textAlignment="center"
-            android:visibility="invisible"
-            android:id="@+id/currently" />
+            <TextView
+                android:layout_marginTop="10dp"
+                android:text="@string/notActive"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="25sp"
+                android:textAlignment="center"
+                android:visibility="invisible"
+                android:id="@+id/currently" />
 
 
-            </LinearLayout>
+        </LinearLayout>
 
         <LinearLayout
             android:layout_marginLeft="-30dp"
@@ -97,15 +86,15 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Listening for data..."
-                android:layout_marginTop="60dp"
-                android:layout_marginLeft="10dp"
-                android:fontFamily="sans-serif-thin"
-                android:id="@+id/currentActivity"
-                android:textSize="30sp"></TextView>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Listening for data..."
+                    android:layout_marginTop="60dp"
+                    android:layout_marginLeft="10dp"
+                    android:fontFamily="sans-serif-thin"
+                    android:id="@+id/currentActivity"
+                    android:textSize="30sp"></TextView>
 
                 <com.wang.avi.AVLoadingIndicatorView
                     android:id="@+id/avi"

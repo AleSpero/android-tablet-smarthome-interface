@@ -168,7 +168,7 @@ public class WakeUpService extends Service {
 
                             //Notifico i dati all'activity tramite broadcastmanager.
                             //all'activity invio un oggetto JSON con l'attività corrente
-                            currentActivity = (JSONObject) ActivityRecognition.sortActivities(new JSONObject(message)).get(0);
+                            currentActivity = (JSONObject) HomeActivity.sortActivities(new JSONObject(message)).get(0);
                             sendToActivity(currentActivity.toString());
 
                             break;

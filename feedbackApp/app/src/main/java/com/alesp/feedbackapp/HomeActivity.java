@@ -2,13 +2,21 @@ package com.alesp.feedbackapp;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -43,11 +51,91 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 import com.mikepenz.materialize.util.UIUtils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.support.v4.app.FragmentActivity;
+
+
 /**
  * Created by alesp on 31/03/2017.
  */
 
-public class HomeActivity extends Activity {
+public class HomeActivity extends FragmentActivity {
+
+    //Definisco il mio service e il boolean boundtoactivity per indicare se il processo
+    // è collegato all'activity
+    private WakeUpService wakeService;
+    private boolean wakeupBoundToActivity = false;
+
+    //variabile che gestisce visibilità webview
+    boolean webviewVisibleBefore = false;
+
+    //variabili per notifiche
+    NotificationManager notificationmanager;
+    Notification notifica;
+    int NOTIFICATION_SERVICE_RUNNING_ID = 0;
+
+    private ServiceConnection wakeupConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.v("onServiceConnected", "Service WakeUpService connesso!");
+
+
+            Toast.makeText(HomeActivity.this, "Activity recognition service started!", Toast.LENGTH_SHORT).show();
+
+            //creo notifica permanente
+            showNotification();
+
+            //Setto il flag boundtoprocess = true
+            wakeupBoundToActivity = true;
+
+            //Effettuo il collegamento (giusto?)
+            WakeUpService.WakeUpBinder binder = (WakeUpService.WakeUpBinder) service;
+            wakeService = binder.getService();
+
+            //Controllo che il service sia connesso all'activity, e una volta fatto ciò connetto e ricevo i dati
+            if (wakeupBoundToActivity) {
+
+
+                new Handler().postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+
+
+                        if (!wakeService.isConnected()) {
+                            //creo alertdialog e faccio terminare il servizio
+                            new AlertDialog.Builder(HomeActivity.this)
+                                    .setTitle("Connection not available")
+                                    .setMessage("Couldn't connect to the server.\nPlease try later.")
+                                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            disconnectService();
+                                            getFragmentManager().beginTransaction().detach(firstFragment);
+                                            findViewById(R.id.fragmentcontainer).setVisibility(View.GONE);
+                                        }
+                                    })
+                                    .show()
+                                    .setCanceledOnTouchOutside(false);
+
+
+                        }
+                    }
+                }, 300);
+
+            }
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.v("onServiceDisonnected", "Service WakeUpService disconnesso!");
+            wakeupBoundToActivity = false;
+        }
+    };
 
     //Variabile che gestisce il drawer
     Drawer result;
@@ -74,6 +162,9 @@ public class HomeActivity extends Activity {
     WebView webView; //abbastanza autoesplicativo
     String url = "159.149.152.241";
     ProgressDialog progress;
+
+    //fragmento activityrecognition
+    ActivityRecognitionFragment firstFragment;
 
 
 
@@ -136,12 +227,47 @@ public class HomeActivity extends Activity {
                                 break;
 
                             case ACTIVITY_RECOGNITION:
-                                //Faccio partire il service
-                                //Se ho cliccato sul minidrawer, faccio partire l'app senza farla vedere (così parte in automatico il service)
-                                Intent intent = new Intent(HomeActivity.this,ActivityRecognition.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                result.setSelection(-1);
-                                startActivity(intent);
+
+                                //Faccio partire il service e faccio comparire il fragment
+
+                                if(!wakeupBoundToActivity) {
+                                    Intent servIntent = new Intent(HomeActivity.this, WakeUpService.class);
+                                    bindService(servIntent, wakeupConnection, Context.BIND_AUTO_CREATE);
+                                    wakeupBoundToActivity = true;
+                                }
+
+                                //Inflato il fragment
+
+
+                                if(findViewById(R.id.fragmentcontainer).getVisibility() == View.GONE){
+                                    findViewById(R.id.fragmentcontainer).setVisibility(View.VISIBLE);
+                                }
+                                // Check that the activity is using the layout version with
+                                // the fragment_container FrameLayout
+                                if (findViewById(R.id.fragmentcontainer) != null) {
+
+                                    // Create a new Fragment to be placed in the activity layout
+                                    firstFragment = new ActivityRecognitionFragment();
+
+                                    //Se era stata fatta partire la webview, la nascondo
+                                    if(webView.getVisibility()==View.VISIBLE){
+                                        webviewVisibleBefore = true;
+                                        webView.setVisibility(View.GONE);
+                                    }
+
+                                    //Se il fragment è già presente, lo attacco. altrimenti lo creo
+                                    if(firstFragment.isDetached()){
+                                        getFragmentManager().beginTransaction().attach(firstFragment).commit();
+                                    }
+                                    else {
+                                        //faccio comparire il fragmentcontainer e creo il fragment
+                                        findViewById(R.id.fragmentcontainer).setVisibility(View.VISIBLE);
+                                        getFragmentManager().beginTransaction()
+                                                .add(R.id.fragmentcontainer, firstFragment).commit();
+                                    }
+                                }
+
+                                    result.setSelection(-1);
 
 
                                 Log.d("HomeActivity","activityrec "+position);
@@ -150,19 +276,38 @@ public class HomeActivity extends Activity {
                             case DASHBOARD:
                                 Log.d("HomeActivity","dashboard "+position);
                                 result.setSelection(-1);
+
+                                //Stacco fragment (se è connesso)
+                                if(firstFragment != null && firstFragment.isVisible()){
+                                    getFragmentManager().beginTransaction().detach(firstFragment);
+                                }
+
                                 loadPage(DASHBOARD);
+
                                 break;
 
                             case SENSOR_DATA:
                                 //Activity dati sensori
                                 Log.d("HomeActivity","sensordata "+position);
                                 result.setSelection(-1);
+
+                                //Stacco fragment (se è connesso)
+                                if(firstFragment != null && firstFragment.isVisible()){
+                                    getFragmentManager().beginTransaction().detach(firstFragment);
+                                }
+
                                 loadPage(SENSOR_DATA);
                                 break;
 
                             case LOG:
                                 Log.d("HomeActivity","log "+position);
                                 result.setSelection(-1);
+
+                                //Stacco fragment (se è connesso)
+                                if(firstFragment != null && firstFragment.isVisible()){
+                                    getFragmentManager().beginTransaction().detach(firstFragment);
+                                }
+
                                 loadPage(LOG);
                                 break;
 
@@ -171,12 +316,22 @@ public class HomeActivity extends Activity {
                                 Log.d("HomeActivity","settings "+position);
                                 crossFader.crossFade();
                                 result.setSelection(-1);
+
+                                //Stacco fragment (se è connesso)
+                                if(firstFragment != null && firstFragment.isVisible()){
+                                    getFragmentManager().beginTransaction().detach(firstFragment);
+                                }
                                // result.setSelectionAtPosition(4);
                                 //startActivity(new Intent(HomeActivity.this,SettingsActivity.class));
                                 break;
 
                             case SETTINGS_DUMMY:
                                 Log.d("HomeActivity","settingsDummy "+position);
+
+                                //Stacco fragment (se è connesso)
+                                if(firstFragment != null && firstFragment.isVisible()){
+                                    getFragmentManager().beginTransaction().detach(firstFragment);
+                                }
                                 crossFader.crossFade();
                                 result.setSelection(-1);
                                 break;
@@ -184,6 +339,12 @@ public class HomeActivity extends Activity {
                             case ABOUT:
                                 //About
                                 Log.d("HomeActivity","about "+position);
+
+                                //Stacco fragment (se è connesso)
+                                if(firstFragment != null && firstFragment.isVisible()){
+                                    getFragmentManager().beginTransaction().detach(firstFragment);
+                                }
+
                                 result.setSelection(-1);
                                 break;
 
@@ -389,10 +550,13 @@ public class HomeActivity extends Activity {
         //altrimenti carico l'url e basta
 
         if(webView.getVisibility()==View.GONE){
-            progress.setMessage("Connecting...");
-            progress.setIndeterminate(true);
-            progress.setCanceledOnTouchOutside(false);
-            progress.show();
+
+            if(!webviewVisibleBefore){
+                progress.setMessage("Connecting...");
+                progress.setIndeterminate(true);
+                progress.setCanceledOnTouchOutside(false);
+                progress.show();
+            }
 
             webView.setVisibility(View.VISIBLE);
         }
@@ -430,8 +594,96 @@ public class HomeActivity extends Activity {
     @Override
     public void onDestroy(){
         progress.dismiss();
+
+        //tolgo notification
+        notificationmanager.cancel(NOTIFICATION_SERVICE_RUNNING_ID);
+
         super.onDestroy();
     }
+
+    //Metodi custom
+
+    static public JSONArray sortActivities(JSONObject dataFromService){
+        //Prendo il dato ricevuto dal service e lo trasformo in un oggetto JSON
+        JSONObject receivedData;
+        JSONObject maxObj;
+        JSONArray probActivities;
+        JSONArray sortedActivities = new JSONArray();
+
+        int maxIndex = 0;
+
+
+
+        try {
+            receivedData = dataFromService;
+            probActivities = (JSONArray) receivedData.get("data");
+            maxObj = new JSONObject("{'activity':'lol','probability':0.0}");
+
+            //Costruisco un nuovo JSONArray con le attività ordinate in modo descrescente per la probabilità
+            while (probActivities.length() != 0) {
+
+                for (int i = 0; i < probActivities.length(); i++) {
+                    if (probActivities.getJSONObject(i).getDouble("probability") > maxObj.getDouble("probability")) {
+                        maxObj = probActivities.getJSONObject(i);
+                        maxIndex = i;
+                    }
+                }
+
+                //Calcolo il max dell'array, e una volta inserito nel nuovo array, lo cancello dal vecchio
+                sortedActivities.put(maxObj);
+                maxObj = new JSONObject("{'activity':'lol','probability':0.0}");
+                probActivities.remove(maxIndex);
+
+            }
+
+            //Infine, ritorno l'array
+            return sortedActivities;
+
+        } catch (JSONException e) {
+            Log.e("onServiceConnected", e.toString());
+            return null;
+        }
+    }
+
+    private void showNotification() {
+        //creo notifica che rimarrà finchè sarà attivo il service
+
+        /* Qui vi sono le istruzioni per fare in modo che cliccando sulla notifica si riapre l'activity*/
+        Intent notificationIntent = new Intent(getApplicationContext(), HomeActivity.class);
+
+        notificationIntent.setAction("android.intent.action.MAIN");
+        notificationIntent.addCategory("android.intent.category.LAUNCHER");
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(HomeActivity.this, 0,
+                notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        //Qui inizia la costruzionee della notifica vera e propria
+
+        notificationmanager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notifica = new Notification.Builder(this)
+                .setContentTitle("Service Running")
+                .setContentText("The Activity Recognition service is now running.")
+                .setSmallIcon(R.drawable.ic_play_button_sing_colorato)
+                .setOngoing(true)
+                .setContentIntent(pendingIntent)
+                .build();
+
+        notificationmanager.notify(NOTIFICATION_SERVICE_RUNNING_ID, notifica);
+    }
+
+    public void disconnectService() {
+        //Scollego wakeupservice
+        if (wakeupBoundToActivity) {
+            unbindService(wakeupConnection);
+            wakeupBoundToActivity = false;
+            wakeService.stopService(new Intent(HomeActivity.this, WakeUpService.class));
+        }
+
+
+        //tolgo notification
+        notificationmanager.cancel(NOTIFICATION_SERVICE_RUNNING_ID);
+    }
+
 
 }
 

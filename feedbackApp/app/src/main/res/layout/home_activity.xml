@@ -11,6 +11,13 @@
             android:visibility="gone"
             android:layout_marginLeft="25dp"/>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/fragmentcontainer"
+            android:orientation="horizontal"
+            android:visibility="gone"></LinearLayout>
+
         <TextView
             android:text="SmartLab Activity Recognition"
             android:fontFamily="sans-serif-thin"
