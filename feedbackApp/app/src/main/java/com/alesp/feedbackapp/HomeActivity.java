@@ -20,6 +20,7 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -588,6 +589,21 @@ public class HomeActivity extends FragmentActivity {
                     "frms[0].submit(); };");
         }
 
+        //gestisco touch per webview (per evitare che interferisca (???) con il drawer
+        webView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                //Quando tocco la webview blocco il crossfader, quando rilascio il dito lo sblocco
+                if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                    crossFader.withCanSlide(false);
+                } else if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
+                    crossFader.withCanSlide(true);
+                }
+
+                return false;
+            }
+        });
+
 
     }
 
@@ -595,9 +611,13 @@ public class HomeActivity extends FragmentActivity {
     public void onDestroy(){
         progress.dismiss();
 
-        //tolgo notification
-        notificationmanager.cancel(NOTIFICATION_SERVICE_RUNNING_ID);
 
+       if(notifica != null) {
+           //tolgo notification
+           notificationmanager.cancel(NOTIFICATION_SERVICE_RUNNING_ID);
+       }
+
+       disconnectService();
         super.onDestroy();
     }
 

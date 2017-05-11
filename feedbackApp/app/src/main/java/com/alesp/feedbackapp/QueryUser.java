@@ -27,6 +27,7 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.daimajia.androidanimations.library.Techniques;
@@ -51,8 +52,8 @@ public class QueryUser extends Activity implements RecognitionListener {
     //Nota bene: implemento l'interfaccia RecognitionListener e definisco i vari metodi per la speechRecognition.
 
     //Definisco variabili per la UI
-    Button firstactivity;
-    Button secondactivity;
+    ImageButton firstactivity;
+    ImageButton secondactivity;
     Button thirdactivity;
     Button otheractivity;
     RecognitionProgressView progress;
@@ -262,8 +263,8 @@ public class QueryUser extends Activity implements RecognitionListener {
         setContentView(R.layout.query_user);
 
         //faccio collegamenti vari
-        firstactivity = (Button) findViewById(R.id.first_activity);
-        secondactivity = (Button) findViewById(R.id.second_activity);
+        firstactivity = (ImageButton) findViewById(R.id.first_activity);
+        secondactivity = (ImageButton) findViewById(R.id.second_activity);
         // thirdactivity = (Button) findViewById(R.id.third_activity);
         // otheractivity = (Button) findViewById(R.id.other);
         progress = (RecognitionProgressView) findViewById(R.id.progress);
@@ -451,6 +452,68 @@ public class QueryUser extends Activity implements RecognitionListener {
             //Aggiorno i bottoni con le attività più probabili
             firstactivityText.setText((String) sortedActivities.getJSONObject(0).get("activity"));
             secondactivityText.setText((String) sortedActivities.getJSONObject(1).get("activity"));
+
+            switch(sortedActivities.getJSONObject(0).getString("activity")){
+
+                case "Making Breakfast":
+                    firstactivity.setImageResource(R.drawable.ic_cereal);
+                    break;
+
+
+                case "Making Lunch":
+                    firstactivity.setImageResource(R.drawable.ic_lunch);
+                    break;
+
+
+                case "Take Medicine":
+                    firstactivity.setImageResource(R.drawable.ic_drugs);
+                    break;
+
+
+                case "Eating":
+                    //firstactivity.setImageResource(R.drawable.ic_cereal);
+                    break;
+
+
+                case "Setting Up The Table":
+                    //firstactivity.setImageResource(R.drawable.ic_cereal);
+                    break;
+
+                case "Clearing The Table":
+                    //firstactivity.setImageResource(R.drawable.ic_cereal);
+                    break;
+            }
+
+            switch(sortedActivities.getJSONObject(1).getString("activity")){
+
+                case "Making Breakfast":
+                    secondactivity.setImageResource(R.drawable.ic_cereal);
+                    break;
+
+
+                case "Making Lunch":
+                    secondactivity.setImageResource(R.drawable.ic_lunch);
+                    break;
+
+
+                case "Take Medicine":
+                    secondactivity.setImageResource(R.drawable.ic_drugs);
+                    break;
+
+
+                case "Eating":
+                    //secondactivity.setImageResource(R.drawable.ic_cereal);
+                    break;
+
+
+                case "Setting Up The Table":
+                    //secondactivity.setImageResource(R.drawable.ic_cereal);
+                    break;
+
+                case "Clearing The Table":
+                    //secondactivity.setImageResource(R.drawable.ic_cereal);
+                    break;
+            }
 
 
             //thirdactivity.setText((String)sortedActivities.getJSONObject(2).get("activity"));
@@ -762,20 +825,20 @@ public class QueryUser extends Activity implements RecognitionListener {
         int i=0;
 
 
-        String first = firstactivityText.getText().toString().toLowerCase();
-        String second = secondactivityText.getText().toString().toLowerCase();
+        String first [] = firstactivityText.getText().toString().toLowerCase().split(" ");
+        String second [] = secondactivityText.getText().toString().toLowerCase().split(" ");
 
 
         do{
             result = matches.get(i).toLowerCase();
 
-            if(result.contains(first) && !result.contains(second)){
+            if(result.contains(first[first.length-1]) && !result.contains(second[second.length-1])){
                 //Allora è stata detta l'attività del primo bottone: chiamo processfeedback passanto l'activityId 0
                 found = true;
                 userinput.setText(result);
                 processFeedback(FIRST_ACTIVITY);
             }
-            else if(result.contains(second) && !result.contains(first)){
+            else if(result.contains(second[second.length-1]) && !result.contains(first[first.length-1])){
                 //Allora è stata detta l'attività del secondo bottone
                 found = true;
                 userinput.setText(result);

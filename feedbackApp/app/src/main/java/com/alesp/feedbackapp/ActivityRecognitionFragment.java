@@ -70,10 +70,10 @@ public class ActivityRecognitionFragment extends Fragment {
                             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    /*
-                                    disconnectService();
-                                    finish();
-                                    */
+
+                                    //restarto l'activity
+                                    getActivity().recreate();
+
                                 }
                             })
                             .show()
@@ -102,10 +102,40 @@ public class ActivityRecognitionFragment extends Fragment {
 
                     try {
                         obj = new JSONObject(result);
-                        //scrivi in database qui o nel service? boh
                         //cambio testo textview
                         currentActivityText.setText(obj.getString("activity"));
                         //Devo anche cambiare immagine nel bottone
+
+                        switch(obj.getString("activity")){
+
+                            case "Making Breakfast":
+                                currentActivity.setImageResource(R.drawable.ic_cereal);
+                                break;
+
+
+                            case "Making Lunch":
+                                currentActivity.setImageResource(R.drawable.ic_lunch);
+                                break;
+
+
+                            case "Take Medicine":
+                                currentActivity.setImageResource(R.drawable.ic_drugs);
+                                break;
+
+
+                            case "Eating":
+                                //currentActivity.setImageResource(R.drawable.ic_cereal);
+                                break;
+
+
+                            case "Setting Up The Table":
+                                //currentActivity.setImageResource(R.drawable.ic_cereal);
+                                break;
+
+                            case "Clearing The Table":
+                                //currentActivity.setImageResource(R.drawable.ic_cereal);
+                                break;
+                        }
 
                     } catch (JSONException e) {
                         Log.e("ActivityRecognition", e.toString());

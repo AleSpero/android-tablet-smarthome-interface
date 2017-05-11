@@ -91,7 +91,7 @@
                 android:layout_width="wrap_content"
                 android:orientation="vertical">
 
-            <Button
+            <ImageButton
                 android:id="@+id/first_activity"
                 android:gravity="center_horizontal"
                 android:textColor="?android:attr/textColorTertiary"
@@ -100,6 +100,8 @@ style="@style/CustomButton"
                 android:layout_width="260dp"
                 android:layout_height="260dp"
                 android:background="@drawable/buttonshape"
+                android:padding="30dp"
+                android:scaleType="fitCenter"
                 android:layout_marginRight="50dp"
                 />
 
@@ -121,14 +123,16 @@ style="@style/CustomButton"
                 android:layout_width="wrap_content"
                 android:orientation="vertical">
 
-            <Button
+            <ImageButton
                 android:id="@+id/second_activity"
                 android:textSize="25sp"
                 style="@style/CustomButton"
                 android:layout_width="260dp"
                 android:layout_height="260dp"
                 android:background="@drawable/buttonshape"
-                android:textColor="?android:attr/textColorTertiary" />
+                android:textColor="?android:attr/textColorTertiary"
+                android:padding="30dp"
+                android:scaleType="fitCenter"/>
 
                 <TextView
                     android:layout_width="wrap_content"
