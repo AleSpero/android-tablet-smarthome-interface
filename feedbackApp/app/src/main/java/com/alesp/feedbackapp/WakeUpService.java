@@ -33,7 +33,7 @@ public class WakeUpService extends Service {
 
     //Variabili utilizzate per la connessione TCP
     Client client;
-    private String ip = "159.149.152.242";
+    private String ip = "159.149.152.241";
     private int port = 1808;
 
     boolean connected = false;

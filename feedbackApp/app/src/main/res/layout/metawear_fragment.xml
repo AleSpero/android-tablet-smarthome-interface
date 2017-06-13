@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="70dp"
+        >
+
+        <TextView
+            android:text="Metawear Settings"
+            android:fontFamily="sans-serif-thin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/title"
+            android:textSize="70sp"
+            android:textAlignment="center"
+            android:textColor="?android:attr/textColorTertiary" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="60dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/userinput"
+                android:textSize="20sp"
+                android:textAlignment="center"
+                android:gravity="center_horizontal"/>
+
+
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:splitMotionEvents="false">
+
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:orientation="vertical"
+                android:layout_gravity="center_horizontal">
+
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Metawear 1"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="200dp"
+                    android:fontFamily="sans-serif-thin"
+                    android:id="@+id/firstactivity_text"
+                    android:textSize="40sp"
+                    android:gravity="center_horizontal"></TextView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="7dp"
+                    android:text="Device"
+                    android:gravity="center_horizontal"
+                    android:fontFamily="sans-serif-thin"
+                    android:id="@+id/deviceinfo2"
+                    android:textSize="20sp"></TextView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="7dp"
+                    android:text="Model: "
+                    android:gravity="center_horizontal"
+                    android:fontFamily="sans-serif-thin"
+                    android:id="@+id/model2"
+                    android:textSize="20sp"></TextView>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageButton
+                        android:id="@+id/first_activity"
+                        android:gravity="center_horizontal"
+                        android:textColor="?android:attr/textColorTertiary"
+                        android:text="Start"
+                        android:textSize="15sp"
+                        android:layout_marginTop="10dp"
+                        style="@style/CustomButton"
+                        android:layout_width="150dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/button_altro"
+                        android:scaleType="fitCenter"
+                        android:layout_marginRight="15dp"
+                        />
+
+                    <ImageButton
+                        android:id="@+id/startstop"
+                        android:gravity="center_horizontal"
+                        android:textColor="?android:attr/textColorTertiary"
+                        android:text="Start"
+                        android:textSize="15sp"
+                        android:layout_marginTop="10dp"
+                        style="@style/CustomButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/button_altro"
+                        android:scaleType="fitCenter"
+                        android:layout_marginRight="50dp"
+                        />
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:orientation="vertical">
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Metawear 2"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_horizontal"
+                    android:fontFamily="sans-serif-thin"
+                    android:id="@+id/secondactivity_text"
+                    android:textSize="40sp"></TextView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="7dp"
+                    android:text="Device: "
+                    android:gravity="center_horizontal"
+                    android:fontFamily="sans-serif-thin"
+                    android:id="@+id/deviceinfo"
+                    android:textSize="20sp"></TextView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="7dp"
+                    android:text="Model: "
+                    android:gravity="center_horizontal"
+                    android:fontFamily="sans-serif-thin"
+                    android:id="@+id/model"
+                    android:textSize="20sp"></TextView>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageButton
+                        android:id="@+id/first_activity2"
+                        android:gravity="center_horizontal"
+                        android:textColor="?android:attr/textColorTertiary"
+                        android:text="Start"
+                        android:textSize="15sp"
+                        android:layout_marginTop="10dp"
+                        style="@style/CustomButton"
+                        android:layout_width="150dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/button_altro"
+                        android:scaleType="fitCenter"
+                        android:layout_marginRight="15dp"
+                        />
+
+                    <ImageButton
+                        android:id="@+id/startstop2"
+                        android:gravity="center_horizontal"
+                        android:textColor="?android:attr/textColorTertiary"
+                        android:text="Start"
+                        android:textSize="15sp"
+                        android:layout_marginTop="10dp"
+                        style="@style/CustomButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/button_altro"
+                        android:scaleType="fitCenter"
+                        android:layout_marginRight="50dp"
+                        />
+
+
+                </LinearLayout>
+
+
+
+            </LinearLayout>
+
+            <Button
+                android:gravity="center_horizontal"
+                android:id="@+id/third_activity"
+                android:visibility="gone"
+                android:textSize="25sp"
+                style="@style/CustomButton"
+                android:layout_width="260dp"
+                android:layout_height="260dp"
+                android:background="@drawable/buttonshape"
+
+                android:textColor="?android:attr/textColorTertiary" />
+
+        </LinearLayout>
+
+
+
+        <!--  <Button
+              android:visibility="gone"
+              android:layout_gravity="center_horizontal"
+              android:layout_width="880dp"
+              android:layout_height="wrap_content"
+              android:textSize="22sp"
+              android:background="@drawable/button_altro"
+              style="@style/CustomButton"
+              android:layout_marginTop="30dp"
+              android:text="Altro"
+              android:textColor="?android:attr/textColorTertiary"
+              android:fontFamily="sans-serif-medium"
+              android:id="@+id/other" />-->
+
+    </LinearLayout>
+
+</LinearLayout>

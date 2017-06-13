@@ -698,10 +698,6 @@ public class HomeActivity extends FragmentActivity {
             wakeupBoundToActivity = false;
             wakeService.stopService(new Intent(HomeActivity.this, WakeUpService.class));
         }
-
-
-        //tolgo notification
-        notificationmanager.cancel(NOTIFICATION_SERVICE_RUNNING_ID);
     }
 
 
