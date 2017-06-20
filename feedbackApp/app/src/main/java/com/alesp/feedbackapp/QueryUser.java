@@ -700,7 +700,36 @@ public class QueryUser extends Activity implements RecognitionListener {
             //Calcolo quanto tempo è passato dall'invio della richiesta all'input dell'utente.
             long offset = System.currentTimeMillis() - receivedData.getLong("time");
 
-            tempObj = new JSONObject("{'id'="+receivedData.get("id")+",'requestId'=" + receivedData.get("requestId") + ", 'offset'=" + offset + ",'result'='" + selectedObj.get("activity") + "'}");
+            //Inizializzo variabile che serve per mandare il "codice" dell'attività necessario per l'activity recognition
+            String actCode="";
+
+            switch(selectedObj.getString("activity")){
+                case "Making Breakfast":
+                    actCode = "PB";
+                    break;
+
+                case "Making Lunch":
+                    actCode = "PM";
+                    break;
+
+                case "Taking Medicine":
+                    actCode="TM";
+                    break;
+
+                case "Eating":
+                    actCode="E";
+                    break;
+
+                case "Setting Up The Table":
+                    actCode = "PT";
+                    break;
+
+                case "Clearing Up The Table":
+                    actCode = "CU";
+                    break;
+            }
+
+            tempObj = new JSONObject("{'id'="+receivedData.get("id")+",'requestId'=" + receivedData.get("requestId") + ", 'offset'=" + offset + ",'result'='" + actCode + "'}");
 
             Log.d("Nuovo JSON", tempObj.toString());
         } catch (JSONException e) {

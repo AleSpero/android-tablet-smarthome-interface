@@ -1,2 +1,1 @@
-include ':app', 'weka'
-project('weka').projectDir = new File('wekaSTRIPPED')
+include ':app'
