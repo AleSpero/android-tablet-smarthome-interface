@@ -700,7 +700,7 @@ public class QueryUser extends Activity implements RecognitionListener {
             //Calcolo quanto tempo è passato dall'invio della richiesta all'input dell'utente.
             long offset = System.currentTimeMillis() - receivedData.getLong("time");
 
-            tempObj = new JSONObject("{'requestId'=" + receivedData.get("requestId") + ", 'offset'=" + offset + ",'result'='" + selectedObj.get("activity") + "'}");
+            tempObj = new JSONObject("{'id'="+receivedData.get("id")+",'requestId'=" + receivedData.get("requestId") + ", 'offset'=" + offset + ",'result'='" + selectedObj.get("activity") + "'}");
 
             Log.d("Nuovo JSON", tempObj.toString());
         } catch (JSONException e) {
