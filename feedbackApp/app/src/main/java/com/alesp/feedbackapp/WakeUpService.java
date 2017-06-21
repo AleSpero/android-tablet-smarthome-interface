@@ -99,7 +99,7 @@ public class WakeUpService extends Service {
     }
 
     //Definisco metodo per inviare dati ad Activity Recognition
-   private void sendToActivity(String message){
+public void sendToActivity(String message){
        //In questo metodo "avviso" l'app che è arrivato un nuovo dato dal raspberry.
 
        Intent intent = new Intent("NOTIFY_ACTIVITY");

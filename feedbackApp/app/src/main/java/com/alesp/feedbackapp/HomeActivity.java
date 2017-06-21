@@ -627,23 +627,23 @@ public class HomeActivity extends FragmentActivity {
         //Prendo il dato ricevuto dal service e lo trasformo in un oggetto JSON
         JSONObject receivedData;
         JSONObject maxObj;
+        JSONObject tempObj;
         JSONArray probActivities;
         JSONArray sortedActivities = new JSONArray();
 
         int maxIndex = 0;
 
-
-
         try {
             receivedData = dataFromService;
             probActivities = (JSONArray) receivedData.get("data");
             maxObj = new JSONObject("{'activity':'lol','probability':0.0}");
+            tempObj = maxObj;
 
             //Costruisco un nuovo JSONArray con le attività ordinate in modo descrescente per la probabilità
             while (probActivities.length() != 0) {
 
                 for (int i = 0; i < probActivities.length(); i++) {
-                    if (probActivities.getJSONObject(i).getDouble("probability") > maxObj.getDouble("probability")) {
+                    if (probActivities.getJSONObject(i).getDouble("probability") >= maxObj.getDouble("probability")) {
                         maxObj = probActivities.getJSONObject(i);
                         maxIndex = i;
                     }
@@ -651,7 +651,7 @@ public class HomeActivity extends FragmentActivity {
 
                 //Calcolo il max dell'array, e una volta inserito nel nuovo array, lo cancello dal vecchio
                 sortedActivities.put(maxObj);
-                maxObj = new JSONObject("{'activity':'lol','probability':0.0}");
+                maxObj = tempObj;
                 probActivities.remove(maxIndex);
 
             }

@@ -45,8 +45,8 @@ public class Client {
                     new ReceiveThread().start();
 
                     //Faccio partire thread che gestisce il connection check
-                   checkConnectionThread = new Thread(new SendRunnable(true));
-                    checkConnectionThread.start();
+                   //checkConnectionThread = new Thread(new SendRunnable(true));
+                    //checkConnectionThread.start();
 
 
                     if(listener!=null)

@@ -690,8 +690,9 @@ public class QueryUser extends Activity implements RecognitionListener {
         //questo oggetto sarà composto da un id della richiesta, da l'offset ("quanto ci mette l'utente a rispondere") e dalla scelta dell'utente.
 
         //stoppo il text to speech se sta parlando
-        textToSpeech.stop();
-
+        if(textToSpeech != null) {
+            textToSpeech.stop();
+        }
         //Creo il JSON, e chiamo il servizio WakeUpService per inviarlo al server.
         try {
             //Prendo l'oggetto JSON dell'attività selezionata
@@ -725,11 +726,12 @@ public class QueryUser extends Activity implements RecognitionListener {
                     break;
 
                 case "Clearing Up The Table":
+                case "Clearing The Table":
                     actCode = "CU";
                     break;
             }
 
-            tempObj = new JSONObject("{'id'="+receivedData.get("id")+",'requestId'=" + receivedData.get("requestId") + ", 'offset'=" + offset + ",'result'='" + actCode + "'}");
+            tempObj = new JSONObject("{'id'="+receivedData.get("id")+",'requestId'=" + receivedData.get("requestId") + ", 'offset'=" + offset + ",'result'='" + actCode + "','activity'='"+selectedObj.getString("activity")+"'}");
 
             Log.d("Nuovo JSON", tempObj.toString());
         } catch (JSONException e) {
@@ -738,7 +740,10 @@ public class QueryUser extends Activity implements RecognitionListener {
 
 
         //Procedo con l'invio, segnalo la conferma del feedback e chiudo l'activity
-        wakeService.sendData(tempObj.toString());
+        wakeService.sendData(tempObj.toString()+"\n");
+
+        //Segnalo l'activity corretta al fragment, passando dal service
+        wakeService.sendToActivity(tempObj.toString());
 
         animate();
 
