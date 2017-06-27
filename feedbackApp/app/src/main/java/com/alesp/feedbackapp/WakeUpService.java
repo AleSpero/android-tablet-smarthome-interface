@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.content.LocalBroadcastManager;
@@ -152,11 +153,10 @@ public void sendToActivity(String message){
                                 //Aggiungo all'intent, per ogni iterazione, ogni elemento del JSONarray
                                 intent.putExtra("Data", message);
 
+
                                 intent.setClassName("com.alesp.feedbackapp", "com.alesp.feedbackapp.QueryUser");
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(intent);
-
-
                             }
                             else{
                                 Log.d("WakeupService","Activity già aperta");//E qui?

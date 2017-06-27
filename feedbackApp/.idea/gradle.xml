@@ -10,6 +10,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/commons-math3-3.6" />
+            <option value="$PROJECT_DIR$/gson" />
             <option value="$PROJECT_DIR$/wekaSTRIPPED" />
           </set>
         </option>

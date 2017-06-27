@@ -1,3 +1,4 @@
 include ':app'
 include ':commons-math3-3.6'
 include ':wekaSTRIPPED'
+include ':gson'

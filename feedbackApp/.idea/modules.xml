@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/commons-math3-3.6/commons-math3-3.6.iml" filepath="$PROJECT_DIR$/commons-math3-3.6/commons-math3-3.6.iml" />
       <module fileurl="file://$PROJECT_DIR$/feedbackApp.iml" filepath="$PROJECT_DIR$/feedbackApp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/gson/gson.iml" filepath="$PROJECT_DIR$/gson/gson.iml" />
       <module fileurl="file://$PROJECT_DIR$/wekaSTRIPPED/wekaSTRIPPED.iml" filepath="$PROJECT_DIR$/wekaSTRIPPED/wekaSTRIPPED.iml" />
     </modules>
   </component>
