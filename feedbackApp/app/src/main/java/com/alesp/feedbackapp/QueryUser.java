@@ -466,17 +466,18 @@ public class QueryUser extends Activity implements RecognitionListener {
 
 
                 case "Take Medicine":
+                case "Taking Medicine":
                     firstactivity.setImageResource(R.drawable.ic_drugs);
                     break;
 
 
                 case "Eating":
-                    //firstactivity.setImageResource(R.drawable.ic_cereal);
+                    firstactivity.setImageResource(R.drawable.ic_restaurant);
                     break;
 
 
                 case "Setting Up The Table":
-                    //firstactivity.setImageResource(R.drawable.ic_cereal);
+                    firstactivity.setImageResource(R.drawable.ic_table);
                     break;
 
                 case "Clearing The Table":
@@ -497,17 +498,18 @@ public class QueryUser extends Activity implements RecognitionListener {
 
 
                 case "Take Medicine":
-                    secondactivity.setImageResource(R.drawable.ic_drugs);
+                case "Taking Medicine":
+                    secondactivity.setImageResource(R.drawable.ic_tablets);
                     break;
 
 
                 case "Eating":
-                    //secondactivity.setImageResource(R.drawable.ic_cereal);
+                    secondactivity.setImageResource(R.drawable.ic_restaurant);
                     break;
 
 
                 case "Setting Up The Table":
-                    //secondactivity.setImageResource(R.drawable.ic_cereal);
+                    secondactivity.setImageResource(R.drawable.ic_table);
                     break;
 
                 case "Clearing The Table":

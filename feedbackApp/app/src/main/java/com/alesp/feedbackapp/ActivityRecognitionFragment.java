@@ -98,12 +98,6 @@ public class ActivityRecognitionFragment extends Fragment {
                 }
                 else {
 
-                    //Eseguo suono di notifica di nuova attività ricevuta
-                    //Faccio partire suono notifica
-                    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                    Ringtone r = RingtoneManager.getRingtone(getActivity().getApplicationContext(), notification);
-                    r.play();
-
                     //Ricevo dati dal service ed aggiorno l'UI
                     String result = intent.getStringExtra("CURRENT_ACTIVITY");
                     JSONObject obj;
@@ -140,12 +134,12 @@ public class ActivityRecognitionFragment extends Fragment {
                                     //Faccio ritornare la view come all'apertura del fragment
                                     view.findViewById(R.id.currently).setVisibility(View.GONE);
                                     currentActivity.setVisibility(View.GONE);
-                                    avi.setVisibility(View.VISIBLE);
+                                   // avi.setVisibility(View.VISIBLE);
 
                                     //diminuisco margin di currentactivitytext
-                                    LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                                    llp.setMargins(0, 20, 0, 0); // llp.setMargins(left, top, right, bottom);
-                                    currentActivityText.setLayoutParams(llp);
+                                    LinearLayout.LayoutParams lls = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                                    lls.setMargins(10, 70, 0, 0); // llp.setMargins(left, top, right, bottom);
+                                    currentActivityText.setLayoutParams(lls);
                                     currentActivityText.setText("Listening for data...");
 
                                     firstDataReceived = true;
@@ -176,6 +170,7 @@ public class ActivityRecognitionFragment extends Fragment {
 
 
                             case "Take Medicine":
+                            case "Taking Medicine":
                                 currentActivity.setImageResource(R.drawable.ic_tablets);
                                 break;
 

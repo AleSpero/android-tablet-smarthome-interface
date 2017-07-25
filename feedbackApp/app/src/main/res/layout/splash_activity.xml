@@ -30,7 +30,7 @@
             android:textAlignment="center" />
 
         <TextView
-            android:text="By Alessandro Sperotti. metti altre cose, università, ecc"
+            android:text="Designed and developed by Alessandro Sperotti."
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/textView"

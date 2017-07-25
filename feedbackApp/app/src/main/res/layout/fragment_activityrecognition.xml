@@ -91,13 +91,16 @@
                     android:layout_height="wrap_content"
                     android:text="Listening for data..."
                     android:layout_marginTop="60dp"
-                    android:layout_marginLeft="10dp"
+                    android:layout_marginLeft="0dp"
                     android:fontFamily="sans-serif-thin"
                     android:id="@+id/currentActivity"
                     android:textSize="30sp"></TextView>
 
+                <!--metti marginleft di listening for data 10 se metti la rotellina visibile-->
+
                 <com.wang.avi.AVLoadingIndicatorView
                     android:id="@+id/avi"
+                    android:visibility="gone"
                     android:layout_marginTop="70dp"
                     android:layout_marginLeft="20dp"
                     android:layout_width="20dp"

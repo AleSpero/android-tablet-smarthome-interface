@@ -3,6 +3,9 @@ package com.alesp.feedbackapp;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -34,7 +37,7 @@ public class WakeUpService extends Service {
 
     //Variabili utilizzate per la connessione TCP
     Client client;
-    private String ip = "159.149.152.241";
+    private String ip =  "159.149.145.58"; //"159.149.152.241";
     private int port = 1808;
 
     boolean connected = false;
@@ -170,6 +173,12 @@ public void sendToActivity(String message){
                             //all'activity invio un oggetto JSON con l'attività corrente
                             currentActivity = (JSONObject) HomeActivity.sortActivities(new JSONObject(message)).get(0);
                             sendToActivity(currentActivity.toString());
+
+                            //Eseguo suono di notifica di nuova attività ricevuta
+                            //Faccio partire suono notifica
+                            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                            r.play();
 
                             break;
 

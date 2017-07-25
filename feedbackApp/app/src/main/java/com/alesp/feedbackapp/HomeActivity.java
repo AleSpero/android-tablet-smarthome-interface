@@ -152,8 +152,8 @@ public class HomeActivity extends FragmentActivity {
     //gestisco costanti per gestire gli elementi del drawer
     final static int CONTROL_PANEL = 0;
     final static int ACTIVITY_RECOGNITION = 2;
-    final static int DASHBOARD = 3;
-    final static int SENSOR_DATA = 4;
+    final static int DASHBOARD = 4;
+    final static int SENSOR_DATA = 3;
     final static int LOG = 5;
     final static int SETTINGS_DUMMY = 7;
     final static int SETTINGS = 8;
@@ -161,7 +161,7 @@ public class HomeActivity extends FragmentActivity {
 
     //Inizializzo variabili webview
     WebView webView; //abbastanza autoesplicativo
-    String url = "159.149.152.241";
+    String url = "159.149.145.58";//"159.149.152.241";
     ProgressDialog progress;
 
     //fragmento activityrecognition
