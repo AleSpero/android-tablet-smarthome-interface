@@ -201,8 +201,8 @@ public class HomeActivity extends FragmentActivity {
                         controlpanel,
                         new DividerDrawerItem(),
                         new PrimaryDrawerItem().withName("Activity Recognition").withIcon(GoogleMaterial.Icon.gmd_directions_walk).withIdentifier(ACTIVITY_RECOGNITION),
-                        new PrimaryDrawerItem().withName("Dashboard").withIcon(GoogleMaterial.Icon.gmd_dashboard).withIdentifier(DASHBOARD),
                         new PrimaryDrawerItem().withName("Sensor Data").withIcon(FontAwesome.Icon.faw_bar_chart).withIdentifier(SENSOR_DATA),
+                        new PrimaryDrawerItem().withName("Dashboard").withIcon(GoogleMaterial.Icon.gmd_dashboard).withIdentifier(DASHBOARD),
                         new PrimaryDrawerItem().withName("Log").withIcon(FontAwesome.Icon.faw_file_text_o).withIdentifier(LOG),
                         //Setto collapsable per i settings
                         new ExpandableDrawerItem().withName(getString(R.string.settings)).withIcon(GoogleMaterial.Icon.gmd_settings).withIdentifier(SETTINGS).withSelectable(false).withSubItems(

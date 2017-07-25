@@ -8,6 +8,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -94,6 +97,12 @@ public class ActivityRecognitionFragment extends Fragment {
                             .setCanceledOnTouchOutside(false);
                 }
                 else {
+
+                    //Eseguo suono di notifica di nuova attività ricevuta
+                    //Faccio partire suono notifica
+                    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                    Ringtone r = RingtoneManager.getRingtone(getActivity().getApplicationContext(), notification);
+                    r.play();
 
                     //Ricevo dati dal service ed aggiorno l'UI
                     String result = intent.getStringExtra("CURRENT_ACTIVITY");
