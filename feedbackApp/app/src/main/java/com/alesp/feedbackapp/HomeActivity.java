@@ -161,7 +161,7 @@ public class HomeActivity extends FragmentActivity {
 
     //Inizializzo variabili webview
     WebView webView; //abbastanza autoesplicativo
-    String url = "159.149.145.58";//"159.149.152.241";
+    String url = "159.149.145.59";//"159.149.152.241";
     ProgressDialog progress;
 
     //fragmento activityrecognition

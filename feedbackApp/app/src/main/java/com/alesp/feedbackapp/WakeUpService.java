@@ -33,11 +33,11 @@ public class WakeUpService extends Service {
     //WakeUpService si occupa di chiamare, con un criterio non ancora deciso, l'attività QueryUser, per interrogarlo sull'attività
     //che sta facendo. Questo servizio girerà esclusivamente su IdleActivity.
 
-    //UPDATE 22/03: WAkeupService viene integrato a connectionService: in questo modo esso gestisce anche la connessione con il server.
+    //UPDATE 22/03: WakeupService viene integrato a connectionService: in questo modo esso gestisce anche la connessione con il server.
 
     //Variabili utilizzate per la connessione TCP
     Client client;
-    private String ip =  "159.149.145.58"; //"159.149.152.241";
+    private String ip =  "159.149.145.59"; //"159.149.152.241";
     private int port = 1808;
 
     boolean connected = false;
